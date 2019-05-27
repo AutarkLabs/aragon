@@ -8,3 +8,5 @@ const KNOWN_REPOS = new Set([
 export function isKnownRepo(appId) {
   return KNOWN_REPOS.has(appId)
 }
+
+export const withProfiles = process.env.WITH_PROFILES || false
