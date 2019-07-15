@@ -6,6 +6,35 @@ import { AppType, EthereumAddressType } from '../prop-types'
 import { shortenAddress } from '../web3-utils'
 import AppIcon from './AppIcon/AppIcon'
 
+const css = `
+  display: flex;
+  align-items: center;
+  height: 0;
+  margin-right: 10px;
+  margin-top: -1px;
+`
+
+export const ContractlessAppLabel = React.memo(({ appId, showIcon = true }) => {
+  const { above } = useViewport()
+
+  return (
+    <Main>
+      {above('medium') && showIcon && (
+        <div css={css}>
+          <AppIcon app={{ appId }} />
+        </div>
+      )}
+      <AppName>{appId}</AppName>
+      <StyledBadge title={appId}>No Contract</StyledBadge>
+    </Main>
+  )
+})
+
+ContractlessAppLabel.propTypes = {
+  appId: PropTypes.string.isRequired,
+  showIcon: PropTypes.bool,
+}
+
 const AppInstanceLabel = React.memo(
   ({ app, proxyAddress, showIcon = true }) => {
     const { above } = useViewport()
@@ -13,15 +42,7 @@ const AppInstanceLabel = React.memo(
     return (
       <Main>
         {above('medium') && showIcon && (
-          <div
-            css={`
-              display: flex;
-              align-items: center;
-              height: 0;
-              margin-right: 10px;
-              margin-top: -1px;
-            `}
-          >
+          <div css={css}>
             <AppIcon app={app} />
           </div>
         )}
@@ -76,5 +97,4 @@ const AppName = styled.span`
     `
   )}
 `
-
 export default AppInstanceLabel
