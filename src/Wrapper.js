@@ -453,7 +453,7 @@ class Wrapper extends React.PureComponent {
       )
     }
 
-    if (withProfiles && instanceId === 'profile') {
+    if (instanceId === 'profile') {
       return (
         <Profile
           account={account}
