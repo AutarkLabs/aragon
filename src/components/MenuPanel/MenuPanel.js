@@ -32,6 +32,7 @@ const APP_APPS_CENTER = staticApps.get('apps').app
 const APP_HOME = staticApps.get('home').app
 const APP_PERMISSIONS = staticApps.get('permissions').app
 const APP_SETTINGS = staticApps.get('settings').app
+const APP_PROFILE = staticApps.get('profile').app
 
 const systemAppsOpenedState = {
   key: 'SYSTEM_APPS_OPENED_STATE',
@@ -168,7 +169,12 @@ class MenuPanel extends React.PureComponent {
     })
 
     const menuApps = !hasHomeApp ? [APP_HOME, appGroupsSorted] : appGroupsSorted
-    const systemApps = [APP_PERMISSIONS, APP_APPS_CENTER, APP_SETTINGS]
+    const systemApps = [
+      APP_PERMISSIONS,
+      APP_APPS_CENTER,
+      APP_SETTINGS,
+      APP_PROFILE,
+    ]
 
     return (
       <Main>

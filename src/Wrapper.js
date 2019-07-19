@@ -28,7 +28,6 @@ import {
 import { getAppPath } from './routing'
 import { APPS_STATUS_LOADING, DAO_STATUS_LOADING } from './symbols'
 import { addressesEqual } from './web3-utils'
-import { withProfiles } from './repo-utils'
 
 class Wrapper extends React.PureComponent {
   static propTypes = {
@@ -135,11 +134,16 @@ class Wrapper extends React.PureComponent {
   }
 
   openApp = (instanceId, params) => {
+    const { historyPush, locator, account } = this.props
     if (this.props.autoClosingPanel) {
       this.handleMenuPanelClose()
     }
 
-    const { historyPush, locator } = this.props
+    if (instanceId === 'profile') {
+      historyPush(`${getAppPath({ dao: locator.dao, instanceId })}/${account}`)
+      return
+    }
+
     historyPush(getAppPath({ dao: locator.dao, instanceId, params }))
   }
 

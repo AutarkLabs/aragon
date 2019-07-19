@@ -44,6 +44,15 @@ export const staticApps = new Map(
       },
       route: '/settings',
     },
+    profile: {
+      app: {
+        appId: 'profile',
+        name: 'My Profile',
+        icon: <IconPermissions />,
+        instances: [{ instanceId: 'profile' }],
+      },
+      route: '/profile',
+    },
   })
 )
 
