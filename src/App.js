@@ -1,6 +1,6 @@
 import React from 'react'
-import createHistory from 'history/createHashHistory'
-import { contractAddresses, web3Providers } from './environment'
+import { createHashHistory as createHistory } from 'history'
+import { contractAddresses, network, web3Providers } from './environment'
 import { parsePath } from './routing'
 import initWrapper, {
   initDaoBuilder,
@@ -20,6 +20,7 @@ import { ModalProvider } from './components/ModalManager/ModalManager'
 import { IdentityProvider } from './components/IdentityManager/IdentityManager'
 import { LocalIdentityModalProvider } from './components/LocalIdentityModal/LocalIdentityModalManager'
 import LocalIdentityModal from './components/LocalIdentityModal/LocalIdentityModal'
+import HelpScoutBeacon from './components/HelpScoutBeacon/HelpScoutBeacon'
 import { isKnownRepo } from './repo-utils'
 import {
   APP_MODE_START,
@@ -50,6 +51,18 @@ const INITIAL_DAO_STATE = {
   homeSettings: { address: '', name: '' },
 }
 
+const SELECTOR_NETWORKS = [
+  ['main', 'Ethereum Mainnet', 'https://mainnet.aragon.org/'],
+  ['rinkeby', 'Ethereum Testnet (Rinkeby)', 'https://rinkeby.aragon.org/'],
+]
+if (network.type === 'ropsten') {
+  SELECTOR_NETWORKS.push([
+    'ropsten',
+    'Ethereum Testnet (Ropsten)',
+    'https://aragon.ropsten.aragonpm.com/',
+  ])
+}
+
 class App extends React.Component {
   state = {
     ...INITIAL_DAO_STATE,
@@ -66,10 +79,7 @@ class App extends React.Component {
     identityIntent: null,
     locator: {},
     prevLocator: null,
-    selectorNetworks: [
-      ['main', 'Ethereum Mainnet', 'https://mainnet.aragon.org/'],
-      ['rinkeby', 'Ethereum Testnet (Rinkeby)', 'https://rinkeby.aragon.org/'],
-    ],
+    selectorNetworks: SELECTOR_NETWORKS,
     transactionBag: null,
     signatureBag: null,
     walletNetwork: '',
@@ -109,8 +119,10 @@ class App extends React.Component {
   }
 
   // Handle URL changes
-  handleHistoryChange = ({ pathname, search }) => {
-    this.updateLocator(parsePath(pathname, search))
+  handleHistoryChange = ({ pathname, search, state = {} }) => {
+    if (!state.alreadyParsed) {
+      this.updateLocator(parsePath(this.history, pathname, search))
+    }
   }
 
   // Change the URL if needed
@@ -388,17 +400,12 @@ class App extends React.Component {
       wrapper,
       homeSettings,
     } = this.state
-    const { mode, dao } = locator
+    const { mode } = locator
     const { address: intentAddress = null, label: intentLabel = '' } =
       identityIntent || {}
 
     if (!mode) {
       return null
-    }
-    if (mode === 'invalid') {
-      throw new Error(
-        `URL contained invalid organization name or address (${dao}).\nPlease modify it to be a valid ENS name or address.`
-      )
     }
     if (fatalError !== null) {
       throw fatalError
@@ -483,6 +490,8 @@ class App extends React.Component {
                     walletProviderId={walletProviderId}
                   />
                 </div>
+
+                <HelpScoutBeacon locator={locator} apps={apps} />
               </ActivityProvider>
             </FavoriteDaosProvider>
           </LocalIdentityModalProvider>

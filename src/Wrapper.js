@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import memoize from 'lodash.memoize'
-import { Viewport } from '@aragon/ui'
+import { useViewport } from '@aragon/ui'
 import { AppCenter, Permissions, Settings } from './apps'
 import AppIFrame from './components/App/AppIFrame'
 import App404 from './components/App404/App404'
@@ -12,6 +12,8 @@ import CombinedPanel from './components/MenuPanel/CombinedPanel'
 import SignerPanel from './components/SignerPanel/SignerPanel'
 import UpgradeBanner from './components/Upgrade/UpgradeBanner'
 import UpgradeOrganizationPanel from './components/Upgrade/UpgradeOrganizationPanel'
+import AppLoader from './components/App/AppLoader'
+import { useIdentity } from './components/IdentityManager/IdentityManager'
 import {
   AppType,
   AppsStatusType,
@@ -23,9 +25,8 @@ import {
   HomeSettingsType,
 } from './prop-types'
 import { getAppPath } from './routing'
-import { APPS_STATUS_LOADING } from './symbols'
+import { APPS_STATUS_LOADING, DAO_STATUS_LOADING } from './symbols'
 import { addressesEqual } from './web3-utils'
-import ethereumLoadingAnimation from './assets/ethereum-loading.svg'
 
 class Wrapper extends React.PureComponent {
   static propTypes = {
@@ -39,6 +40,7 @@ class Wrapper extends React.PureComponent {
     daoStatus: DaoStatusType.isRequired,
     historyBack: PropTypes.func.isRequired,
     historyPush: PropTypes.func.isRequired,
+    identityEvents$: PropTypes.object.isRequired,
     locator: PropTypes.object.isRequired,
     onRequestAppsReload: PropTypes.func.isRequired,
     onRequestEnable: PropTypes.func.isRequired,
@@ -66,13 +68,25 @@ class Wrapper extends React.PureComponent {
   }
 
   state = {
+    appLoading: false,
     menuPanelOpened: !this.props.autoClosingPanel,
-    preferencesOpened: false,
     orgUpgradePanelOpened: false,
+    preferencesOpened: false,
+  }
+
+  identitySubscription = null
+
+  componentDidMount() {
+    this.startIdentitySubscription()
+  }
+
+  componentWillUnmount() {
+    this.identitySubscription.unsubscribe()
   }
 
   componentDidUpdate(prevProps) {
     this.updateAutoClosingPanel(prevProps)
+    this.updateIdentityEvents(prevProps)
   }
 
   updateAutoClosingPanel(prevProps) {
@@ -80,6 +94,29 @@ class Wrapper extends React.PureComponent {
     if (autoClosingPanel !== prevProps.autoClosingPanel) {
       this.setState({ menuPanelOpened: !autoClosingPanel })
       this.sendDisplayMenuButtonStatus()
+    }
+  }
+
+  updateIdentityEvents(prevProps) {
+    const { identityEvents$ } = this.props
+    if (identityEvents$ !== prevProps.identityEvents$) {
+      this.stopIdentitySubscription()
+      this.startIdentitySubscription()
+    }
+  }
+
+  startIdentitySubscription() {
+    const { identityEvents$ } = this.props
+    this.identitySubscription = identityEvents$.subscribe(event => {
+      if (this.appIFrame) {
+        this.appIFrame.reloadIframe()
+      }
+    })
+  }
+
+  stopIdentitySubscription() {
+    if (this.identitySubscription) {
+      this.identitySubscription.unsubscribe()
     }
   }
 
@@ -107,7 +144,7 @@ class Wrapper extends React.PureComponent {
     this.appIFrame = appIFrame
   }
 
-  handleAppIFrameLoad = async event => {
+  handleAppIFrameLoadingSuccess = async ({ iframeElement }) => {
     const {
       apps,
       wrapper,
@@ -126,7 +163,7 @@ class Wrapper extends React.PureComponent {
       return
     }
 
-    await wrapper.connectAppIFrame(event.target, instanceId)
+    await wrapper.connectAppIFrame(iframeElement, instanceId)
 
     this.appIFrame.sendMessage({
       from: 'wrapper',
@@ -134,7 +171,18 @@ class Wrapper extends React.PureComponent {
       value: true,
     })
     this.sendDisplayMenuButtonStatus()
+    this.setState({ appLoading: false })
   }
+  handleAppIFrameLoadingStart = event => {
+    this.setState({ appLoading: true })
+  }
+  handleAppIFrameLoadingCancel = event => {
+    this.setState({ appLoading: false })
+  }
+  handleAppIFrameLoadingError = event => {
+    this.setState({ appLoading: false })
+  }
+
   handleAppMessage = ({ data: { name, value } }) => {
     if (
       // “menuPanel: Boolean” is deprecated but still supported for a while if
@@ -238,10 +286,15 @@ class Wrapper extends React.PureComponent {
     } = this.props
 
     const {
+      appLoading,
       menuPanelOpened,
-      preferencesOpened,
       orgUpgradePanelOpened,
+      preferencesOpened,
     } = this.state
+
+    const currentApp = apps.find(app =>
+      addressesEqual(app.proxyAddress, locator.instanceId)
+    )
 
     return (
       <Main visible={visible}>
@@ -279,7 +332,15 @@ class Wrapper extends React.PureComponent {
           homeSettings={homeSettings}
         >
           <AppScreen>
-            {this.renderApp(locator.instanceId, locator.params)}
+            <AppLoader
+              appLoading={appLoading}
+              appsLoading={!wrapper || appsStatus === APPS_STATUS_LOADING}
+              currentAppName={currentApp ? currentApp.name : ''}
+              daoLoading={daoStatus === DAO_STATUS_LOADING}
+              instanceId={locator.instanceId}
+            >
+              {this.renderApp(locator.instanceId, locator.params)}
+            </AppLoader>
           </AppScreen>
         </CombinedPanel>
         <SignerPanel
@@ -321,6 +382,7 @@ class Wrapper extends React.PureComponent {
       walletWeb3,
       wrapper,
       homeSettings,
+      canUpgradeOrg,
     } = this.props
 
     const appsLoading = appsStatus === APPS_STATUS_LOADING
@@ -330,7 +392,6 @@ class Wrapper extends React.PureComponent {
       return (
         <Home
           apps={apps}
-          appsLoading={appsLoading}
           connected={connected}
           dao={locator.dao}
           onMessage={this.handleAppMessage}
@@ -349,6 +410,7 @@ class Wrapper extends React.PureComponent {
           params={params}
           onMessage={this.handleAppMessage}
           onParamsRequest={this.handleParamsRequest}
+          wrapper={wrapper}
         />
       )
     }
@@ -360,8 +422,10 @@ class Wrapper extends React.PureComponent {
           daoAddress={daoAddress}
           params={params}
           repos={repos}
+          canUpgradeOrg={canUpgradeOrg}
           reposLoading={reposLoading}
           onMessage={this.handleAppMessage}
+          onUpgradeAll={this.showOrgUpgradePanel}
           onParamsRequest={this.handleParamsRequest}
           wrapper={wrapper}
         />
@@ -385,17 +449,21 @@ class Wrapper extends React.PureComponent {
       )
     }
 
+    // AppLoader will display a loading screen in that case
     if (!wrapper || appsLoading) {
-      return <LoadingApps />
+      return null
     }
 
     const app = apps.find(app => addressesEqual(app.proxyAddress, instanceId))
 
     return app ? (
       <AppIFrame
-        app={app}
         ref={this.handleAppIFrameRef}
-        onLoad={this.handleAppIFrameLoad}
+        app={app}
+        onLoadingCancel={this.handleAppIFrameLoadingCancel}
+        onLoadingError={this.handleAppIFrameLoadingError}
+        onLoadingStart={this.handleAppIFrameLoadingStart}
+        onLoadingSuccess={this.handleAppIFrameLoadingSuccess}
         onMessage={this.handleAppMessage}
       />
     ) : (
@@ -426,30 +494,14 @@ const AppScreen = styled.div`
   overflow: auto;
 `
 
-const LoadingAnimation = styled.img`
-  display: block;
-  margin-bottom: 32px;
-`
-
-const LoadingApps = () => (
-  <div
-    style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100%',
-      flexDirection: 'column',
-    }}
-  >
-    <LoadingAnimation src={ethereumLoadingAnimation} />
-    Loading apps…
-  </div>
-)
-
 export default props => {
+  const { below } = useViewport()
+  const { identityEvents$ } = useIdentity()
   return (
-    <Viewport>
-      {({ below }) => <Wrapper {...props} autoClosingPanel={below('medium')} />}
-    </Viewport>
+    <Wrapper
+      {...props}
+      autoClosingPanel={below('medium')}
+      identityEvents$={identityEvents$}
+    />
   )
 }

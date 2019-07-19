@@ -14,6 +14,7 @@ import {
   contractAddresses,
   defaultGasPriceFn,
 } from './environment'
+import { NoConnection, DAONotFound } from './errors'
 import { appBaseUrl } from './url-utils'
 import { noop, removeStartingSlash } from './utils'
 import {
@@ -23,8 +24,8 @@ import {
   isValidEnsName,
   soliditySha3,
 } from './web3-utils'
-import { getBlobUrl, WorkerSubscriptionPool } from './worker-utils'
-import { NoConnection, DAONotFound } from './errors'
+import SandboxedWorker from './worker/SandboxedWorker'
+import WorkerSubscriptionPool from './worker/WorkerSubscriptionPool'
 
 import AragonStorage from './storage/storage-wrapper'
 
@@ -290,6 +291,7 @@ const subscribe = (
         )
         .forEach(async app => {
           const { name, proxyAddress, script, updated } = app
+          const workerName = `${name}(${proxyAddress})`
           const baseUrl = appBaseUrl(app, ipfsConf.gateway)
 
           // If the app URL is empty, the script can’t be retrieved
@@ -304,39 +306,19 @@ const subscribe = (
             baseUrl
           )
 
-          let workerUrl = ''
-          try {
-            // WebWorkers can only load scripts from the local origin, so we
-            // have to fetch the script as text and make a blob out of it
-            workerUrl = await getBlobUrl(scriptUrl)
-          } catch (e) {
-            console.error(
-              `Failed to load ${name}(${proxyAddress})'s script (${script}): `,
-              e
-            )
-            return
-          }
-
           const connectApp = await wrapper.runApp(proxyAddress)
 
           // If the app has been updated, reset its cache and restart its worker
           if (updated && workerSubscriptionPool.hasWorker(proxyAddress)) {
-            await workerSubscriptionPool.removeWorker(proxyAddress, true)
+            await workerSubscriptionPool.removeWorker(proxyAddress, {
+              clearCache: true,
+            })
           }
 
           // If another execution context already loaded this app's worker
           // before we got to it here, let's short circuit
           if (!workerSubscriptionPool.hasWorker(proxyAddress)) {
-            const worker = new Worker(workerUrl)
-            worker.addEventListener(
-              'error',
-              err =>
-                console.error(
-                  `Error from worker for ${name}(${proxyAddress}):`,
-                  err
-                ),
-              false
-            )
+            const worker = new SandboxedWorker(scriptUrl, { name: workerName })
 
             const provider = new providers.MessagePortMessage(worker)
             workerSubscriptionPool.addWorker({
@@ -345,9 +327,6 @@ const subscribe = (
               connection: connectApp(provider),
             })
           }
-
-          // Clean up the url we created to spawn the worker
-          URL.revokeObjectURL(workerUrl)
         })
     }),
   }

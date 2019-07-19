@@ -10,8 +10,9 @@ import {
 } from '@aragon/ui'
 import { network } from '../../environment'
 import { cssgu } from '../../utils'
-import { shortenAddress, transformAddresses } from '../../web3-utils'
+import { transformAddresses } from '../../web3-utils'
 import AppIcon from '../AppIcon/AppIcon'
+import LocalIdentityBadge from '../../components/IdentityBadge/LocalIdentityBadge'
 import IconSuccess from '../../icons/IconSuccess'
 import IconPending from '../../icons/IconPending'
 import TimeTag from './TimeTag'
@@ -108,7 +109,7 @@ const ItemContent = React.memo(
       {transformAddresses(text, (part, isAddress, index) =>
         isAddress ? (
           <span title={part} key={index}>
-            {shortenAddress(part)}
+            <LocalIdentityBadge entity={part} compact />
           </span>
         ) : (
           <span key={index}>{part}</span>
