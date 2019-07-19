@@ -90,7 +90,6 @@ class RoleRow extends React.Component {
       app: PropTypes.object,
       type: PropTypes.string,
       address: EthereumAddressType,
-      app: AppType,
     }).isRequired,
   }
   handleManageClick = () => {
