@@ -1,5 +1,10 @@
 import React from 'react'
-import { IconSettings, IconPermissions, IconApps } from '@aragon/ui'
+import {
+  IconSettings,
+  IconPermissions,
+  IconApps,
+  IconIdentity,
+} from '@aragon/ui'
 import AppIcon from './components/AppIcon/AppIcon'
 
 const homeApp = {
@@ -48,7 +53,7 @@ export const staticApps = new Map(
       app: {
         appId: 'profile',
         name: 'My Profile',
-        icon: <IconPermissions />,
+        icon: <IconIdentity />,
         instances: [{ instanceId: 'profile' }],
       },
       route: '/profile',
