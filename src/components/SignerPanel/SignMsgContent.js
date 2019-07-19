@@ -6,15 +6,16 @@ import { Info, Text, SidePanelSeparator, theme } from '@aragon/ui'
 import SignerButton from './SignerButton'
 import ToggleContent from './ToggleContent'
 import LocalIdentityBadge from '../IdentityBadge/LocalIdentityBadge'
-import AppInstanceLabel from '../AppInstanceLabel'
+import AppInstanceLabel, { ContractlessAppLabel } from '../AppInstanceLabel'
 import { AppType, EthereumAddressType } from '../../prop-types'
 import { isHumanReadable } from '../../utils'
 
 const SignMsgContent = ({ apps, account, intent, onSign, signingEnabled }) => {
-  const locateAppInfo = (apps, requestingApp) =>
-    apps.find(({ proxyAddress }) => proxyAddress === requestingApp)
-
+  const locatedAppInfo = apps.find(
+    ({ proxyAddress }) => proxyAddress === intent.requestingApp
+  )
   const humanReadableMessage = isHumanReadable(intent.message)
+
   return (
     <React.Fragment>
       <span css="margin-right: 4px">
@@ -23,11 +24,17 @@ const SignMsgContent = ({ apps, account, intent, onSign, signingEnabled }) => {
       </span>
       <Separator />
       <Label>Signature requested by</Label>
-      <AppInstanceLabel
-        app={locateAppInfo(apps, intent.requestingApp)}
-        proxyAddress={intent.requestingApp}
-        showIcon
-      />
+
+      {locatedAppInfo ? (
+        <AppInstanceLabel
+          app={locatedAppInfo}
+          proxyAddress={intent.requestingApp}
+          showIcon
+        />
+      ) : (
+        <ContractlessAppLabel appId={intent.requestingApp} showIcon />
+      )}
+
       <Separator />
       {humanReadableMessage ? (
         <React.Fragment>
