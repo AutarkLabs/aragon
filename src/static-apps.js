@@ -52,7 +52,7 @@ export const staticApps = new Map(
     profile: {
       app: {
         appId: 'profile',
-        name: 'My Profile',
+        name: 'Profile',
         icon: <IconIdentity />,
         instances: [{ instanceId: 'profile' }],
       },
