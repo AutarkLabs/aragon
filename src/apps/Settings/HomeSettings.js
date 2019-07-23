@@ -99,7 +99,7 @@ class HomeSettings extends React.Component {
     return (
       <Option
         name="Home Page"
-        text={`You can update the home page to be any of your existing apps or use the default. We recommend installing the new Home app first and choose that.`}
+        text={`You can update the home page to be any of your existing apps or use the default. We recommend installing the new Home app first and choosing that.`}
       >
         <WideFlex>
           <Field label="Select app">
