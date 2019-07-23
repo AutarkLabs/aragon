@@ -99,7 +99,7 @@ class HomeSettings extends React.Component {
     return (
       <Option
         name="Home Page"
-        text={`The default home page is a list of shortcuts to other apps. You can set another home page, which can be any of your existing apps. You might want to install the Home app first and select that!`}
+        text={`You can update the home page to be any of your existing apps or use the default. We recommend installing the new Home app first and choose that.`}
       >
         <WideFlex>
           <Field label="Select app">
@@ -111,7 +111,7 @@ class HomeSettings extends React.Component {
             />
           </Field>
           {selectedhomeAppAlias !== defaultOption ? (
-            <Field label="Enter tab name">
+            <Field label="App Label">
               <TextInput
                 onChange={this.handleHomeNameChange}
                 value={homeAppAlias}
