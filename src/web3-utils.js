@@ -218,5 +218,6 @@ export {
   isAddress,
   soliditySha3,
   toChecksumAddress,
+  toHex,
   toWei,
 } from 'web3-utils'

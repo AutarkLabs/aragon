@@ -1,5 +1,5 @@
 import tokens from '@aragon/templates-tokens'
-import { soliditySha3 } from '../web3-utils'
+import { toHex } from '../web3-utils'
 import storageAbi from './storage-abi.json'
 
 export function testTokensEnabled(network) {
@@ -15,13 +15,22 @@ export default {
     if (!values || values.length === 0) {
       return
     }
-    for (const paramKey of Object.keys(values)) {
-      upgradeIntents.push([
-        storageAddr,
-        'registerData',
-        [soliditySha3(paramKey), values[paramKey]],
-      ])
-    }
+
+    // for (const paramKey of Object.keys(values)) {
+    //   upgradeIntents.push([
+    //     storageAddr,
+    //     'registerData',
+    //     [soliditySha3(paramKey), values[paramKey]],
+    //   ])
+    // }
+    const intentKeys = Object.keys(values).map(k => toHex(k))
+    const intentValues = Object.values(values).map(v => toHex(v))
+
+    upgradeIntents.push([
+      storageAddr,
+      'changeMultipleSettings',
+      [intentKeys, intentValues],
+    ])
 
     const upgradePath = await wrapper.getTransactionPathForIntentBasket(
       upgradeIntents,
@@ -41,7 +50,7 @@ export default {
   },
   get: (web3, storageAddr, from, paramName) =>
     getContract(web3, storageAddr)
-      .methods.getRegisteredData(soliditySha3(paramName))
+      .methods.getRegisteredData(toHex(paramName))
       .call({ from: from }),
   subscribe: (web3, storageAddr, paramName, callback) =>
     getContract(web3, storageAddr).events.Registered(paramName, callback),
