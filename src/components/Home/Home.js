@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import { Text, theme } from '@aragon/ui'
 import HomeCard from './HomeCard'
-import { AppType } from '../../prop-types'
+import { AppType, HomeSettingsType } from '../../prop-types'
 import AppLayout from '../../components/AppLayout/AppLayout'
 import { appIds } from '../../environment'
 import logo from './assets/logo-background.svg'
@@ -54,6 +54,26 @@ class Home extends React.Component {
     dao: PropTypes.string.isRequired,
     onMessage: PropTypes.func.isRequired,
     onOpenApp: PropTypes.func.isRequired,
+    homeSettings: HomeSettingsType,
+  }
+
+  componentDidUpdate() {
+    this.redirectHome()
+  }
+
+  componentDidMount() {
+    this.redirectHome()
+  }
+
+  redirectHome() {
+    const { onOpenApp, homeSettings } = this.props
+
+    const hasHomeApp = homeSettings && homeSettings.address !== ''
+    if (hasHomeApp) {
+      if (onOpenApp) {
+        onOpenApp(homeSettings.address)
+      }
+    }
   }
   handleCardAction = actionId => {
     const { onOpenApp, apps } = this.props

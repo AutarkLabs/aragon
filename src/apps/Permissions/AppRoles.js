@@ -87,6 +87,7 @@ class RoleRow extends React.Component {
       name: PropTypes.name,
     }).isRequired,
     manager: PropTypes.shape({
+      app: PropTypes.object,
       type: PropTypes.string,
       address: EthereumAddressType,
       app: AppType,

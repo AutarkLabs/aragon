@@ -12,6 +12,7 @@ import {
   DaoAddressType,
   DaoStatusType,
   EthereumAddressType,
+  HomeSettingsType,
 } from '../../prop-types'
 import { DAO_STATUS_LOADING } from '../../symbols'
 import { staticApps } from '../../static-apps'
@@ -64,6 +65,7 @@ class MenuPanel extends React.PureComponent {
     onRequestEnable: PropTypes.func.isRequired,
     unreadActivityCount: PropTypes.number,
     viewportHeight: PropTypes.number,
+    homeSettings: HomeSettingsType,
   }
 
   _contentRef = React.createRef()
@@ -147,11 +149,25 @@ class MenuPanel extends React.PureComponent {
       onOpenPreferences,
       unreadActivityCount,
       onRequestEnable,
+      homeSettings,
     } = this.props
     const { scrollVisible, systemAppsOpened, systemAppsToggled } = this.state
 
     const appGroups = this.getRenderableAppGroups(appInstanceGroups)
-    const menuApps = [APP_HOME, appGroups]
+
+    const hasHomeApp = homeSettings && homeSettings.address !== ''
+
+    const appGroupsSorted = appGroups.sort((app1, app2) => {
+      if (
+        // NOTE: Only managed to get instance id from instances.
+        app1.instances[0].instanceId === homeSettings.address ||
+        app2.instances[0].instanceId === homeSettings.address
+      ) {
+        return app1.instances[0].instanceId === homeSettings.address ? -1 : 1
+      }
+    })
+
+    const menuApps = !hasHomeApp ? [APP_HOME, appGroupsSorted] : appGroupsSorted
     const systemApps = [APP_PERMISSIONS, APP_APPS_CENTER, APP_SETTINGS]
 
     return (
@@ -177,7 +193,6 @@ class MenuPanel extends React.PureComponent {
           <Content ref={this._contentRef}>
             <div className="in" ref={this._innerContentRef}>
               <h1>Apps</h1>
-
               <div>
                 {menuApps.map(app =>
                   // If it's an array, it's the group being loaded from the ACL
@@ -267,7 +282,7 @@ class MenuPanel extends React.PureComponent {
   }
 
   renderAppGroup(app, isSystem) {
-    const { activeInstanceId, onOpenApp } = this.props
+    const { activeInstanceId, onOpenApp, homeSettings } = this.props
 
     const { appId, name, icon, instances } = app
     const isActive =
@@ -275,10 +290,18 @@ class MenuPanel extends React.PureComponent {
         ({ instanceId }) => instanceId === activeInstanceId
       ) !== -1
 
+    let menuName
+    const hasHomeApp = homeSettings && homeSettings.address !== ''
+    if (hasHomeApp) {
+      const isHomeApp = instances[0].instanceId === homeSettings.address
+      if (isHomeApp) {
+        menuName = homeSettings.name
+      }
+    }
     return (
       <div key={appId}>
         <MenuPanelAppGroup
-          name={name}
+          name={menuName || name}
           icon={icon}
           system={isSystem}
           instances={instances}

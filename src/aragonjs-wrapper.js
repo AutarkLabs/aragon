@@ -24,9 +24,12 @@ import {
   getUnknownBalance,
   getMainAccount,
   isValidEnsName,
+  soliditySha3,
 } from './web3-utils'
 import SandboxedWorker from './worker/SandboxedWorker'
 import WorkerSubscriptionPool from './worker/WorkerSubscriptionPool'
+
+import AragonStorage from './storage/storage-wrapper'
 
 const POLL_DELAY_ACCOUNT = 2000
 const POLL_DELAY_NETWORK = 2000
@@ -203,6 +206,7 @@ const subscribe = (
     onIdentityIntent,
     onSignatures,
     onTransaction,
+    onHomeApp,
   },
   { ipfsConf }
 ) => {
@@ -215,9 +219,11 @@ const subscribe = (
     identityIntents,
     signatures,
     transactions,
+    web3,
   } = wrapper
 
   const workerSubscriptionPool = new WorkerSubscriptionPool()
+  let homeSettingsSubscriber = null
 
   const subscriptions = {
     permissions: permissions.subscribe(onPermissions),
@@ -229,8 +235,45 @@ const subscribe = (
     signatures: signatures.subscribe(onSignatures),
     connectedApp: null,
     connectedWorkers: workerSubscriptionPool,
-
     apps: apps.subscribe(apps => {
+      // If Aragon storage is found, subscribe to the event
+      const storageApp = apps.find(({ name }) => name === 'Storage')
+      if (
+        storageApp &&
+        storageApp.proxyAddress &&
+        homeSettingsSubscriber == null
+      ) {
+        homeSettingsSubscriber = AragonStorage.subscribe(
+          web3,
+          storageApp.proxyAddress,
+          { fromBlock: 0 },
+          async (error, event) => {
+            if (error) {
+              console.log(error)
+            }
+            const account = await getMainAccount(wrapper.web3)
+
+            if (event.returnValues.key === soliditySha3('HOME_APP')) {
+              const address = await AragonStorage.get(
+                wrapper.web3,
+                storageApp.proxyAddress,
+                account,
+                'HOME_APP'
+              )
+              onHomeApp({ address })
+            }
+            if (event.returnValues.key === soliditySha3('HOME_APP_NAME')) {
+              const name = await AragonStorage.get(
+                wrapper.web3,
+                storageApp.proxyAddress,
+                account,
+                'HOME_APP_NAME'
+              )
+              onHomeApp({ name })
+            }
+          }
+        )
+      }
       onApps(
         prepareAppsForFrontend(
           apps,
@@ -322,6 +365,7 @@ const initWrapper = async (
     onSignatures = noop,
     onDaoAddress = noop,
     onWeb3 = noop,
+    onHomeApp = noop,
   } = {}
 ) => {
   const isDomain = isValidEnsName(dao)
@@ -393,6 +437,7 @@ const initWrapper = async (
       onIdentityIntent,
       onSignatures,
       onTransaction,
+      onHomeApp,
     },
     { ipfsConf }
   )

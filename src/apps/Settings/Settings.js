@@ -17,11 +17,13 @@ import {
   AragonType,
   DaoAddressType,
   EthereumAddressType,
+  HomeSettingsType,
 } from '../../prop-types'
 import { checkValidEthNode } from '../../web3-utils'
 import DaoSettings from './DaoSettings'
 import Option from './Option'
 import Note from './Note'
+import HomeSettings from './HomeSettings'
 
 // Only USD for now
 const AVAILABLE_CURRENCIES = ['USD']
@@ -45,12 +47,15 @@ class Settings extends React.Component {
     walletNetwork: PropTypes.string.isRequired,
     walletWeb3: PropTypes.object.isRequired,
     wrapper: AragonType,
+    homeSettings: HomeSettingsType,
   }
   state = {
     currencies: AVAILABLE_CURRENCIES,
     ethNode: defaultEthNode,
+    homeAppAlias: 'Home',
     ipfsGateway: ipfsDefaultConf.gateway,
     selectedCurrency: filterCurrency(getSelectedCurrency()),
+    selectedHomeApp: 'Home',
     selectedNodeError: null,
   }
   handleSelectedCurrencyChange = (index, currencies) => {
@@ -105,6 +110,7 @@ class Settings extends React.Component {
       walletNetwork,
       walletWeb3,
       wrapper,
+      homeSettings,
     } = this.props
     const {
       currencies,
@@ -113,6 +119,7 @@ class Settings extends React.Component {
       selectedCurrency,
       selectedNodeError,
     } = this.state
+
     return (
       <AppLayout
         title="Settings"
@@ -146,6 +153,11 @@ class Settings extends React.Component {
               </Field>
             </Option>
           )}
+          <HomeSettings
+            homeSettings={homeSettings}
+            apps={apps}
+            wrapper={wrapper}
+          />
           <Option
             name="Node settings (advanced)"
             text={`

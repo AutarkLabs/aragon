@@ -141,6 +141,11 @@ export const DaoAddressType = PropTypes.shape({
   domain: PropTypes.string,
 })
 
+export const HomeSettingsType = PropTypes.shape({
+  address: EthereumAddressType,
+  name: PropTypes.string,
+})
+
 export const RenderFnType = PropTypes.oneOfType([
   PropTypes.func,
   PropTypes.oneOf([false]),
