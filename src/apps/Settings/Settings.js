@@ -141,8 +141,7 @@ class Settings extends React.Component {
 
   handleAuthProvider = () => {
     const apiKey = 'ADD YOURS'
-    const apiSecret =
-      'CHANGE THIS'
+    const apiSecret = 'CHANGE THIS'
     createIpfsProvider('pinata', apiKey, apiSecret)
   }
   render() {
