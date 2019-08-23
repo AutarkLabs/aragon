@@ -24,6 +24,11 @@ import DaoSettings from './DaoSettings'
 import Option from './Option'
 import Note from './Note'
 import HomeSettings from './HomeSettings'
+import {
+  storeInCache,
+  getFromCache,
+  createIpfsProvider,
+} from '../../storage/cache'
 
 // Only USD for now
 const AVAILABLE_CURRENCIES = ['USD']
@@ -100,6 +105,46 @@ class Settings extends React.Component {
     })
   }
 
+  handleSetCache = () => {
+    const wrapper = this.props.wrapper
+    const objToStore = {
+      key: 'provider',
+      value: {
+        pinata: {
+          clientId: 123,
+          clientSecret: 456,
+        },
+      },
+    }
+    storeInCache(wrapper, objToStore.key, objToStore.value)
+      .then(console.log)
+      .catch(console.log)
+  }
+
+  handleGetCache = () => {
+    const wrapper = this.props.wrapper
+    const objToStore = {
+      key: 'provider',
+      value: {
+        pinata: {
+          clientId: 123,
+          clientSecret: 456,
+        },
+      },
+    }
+    getFromCache(wrapper, objToStore.key).subscribe({
+      next(x) {
+        console.log('got value ', x)
+      },
+    })
+  }
+
+  handleAuthProvider = () => {
+    const apiKey = 'ADD YOURS'
+    const apiSecret =
+      'CHANGE THIS'
+    createIpfsProvider('pinata', apiKey, apiSecret)
+  }
   render() {
     const {
       account,
@@ -212,12 +257,21 @@ class Settings extends React.Component {
                 <Button mode="secondary" onClick={this.handleRefreshCache}>
                   Clear application cache
                 </Button>
+                <Button mode="secondary" onClick={this.handleSetCache}>
+                  Set application cache
+                </Button>
+                <Button mode="secondary" onClick={this.handleGetCache}>
+                  Get application cache
+                </Button>
               </div>
               <Note>
                 This will only delete the data stored in your browser to make
                 the app load faster. No data related to the organization itself
                 will be altered.
               </Note>
+              <Button mode="secondary" onClick={this.handleAuthProvider}>
+                Auth with your provider
+              </Button>
             </Option>
           )}
         </Content>
