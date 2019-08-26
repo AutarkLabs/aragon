@@ -7,9 +7,28 @@ export function testTokensEnabled(network) {
 }
 
 export const instantiateStorageContract = (address, params, wrapper) => {
-  console.log('here')
   const contract = new wrapper.web3.eth.Contract(storageAbi, address)
-  console.log('contract', contract)
+  return {
+    registerStorageProvider: async(provider, uri) => {
+      const callMethods = storageAbi[0].abi.filter(
+        (item) => item.type === 'function' && !item.constant && item.name === 'registerStorageProvider'
+      )
+      
+      console.log('callMethods', callMethods)
+      console.log('address', address)
+      console.log('provider', provider)
+      console.log('uri', uri)
+      
+      const transactionPath = await wrapper.getExternalTransactionPath(
+        address,
+        callMethods[0],
+        [provider, uri]
+      )
+
+      console.log('transactionP', transactionPath)
+      wrapper.performTransactionPath(transactionPath)
+    }
+  }
 }
 
 // export default {

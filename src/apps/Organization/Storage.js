@@ -95,7 +95,8 @@ const Storage = ({ apps, wrapper }) => {
         onClick={() => {
           console.log('apps', apps)
           const storageApp = apps.find(({name}) => name === 'Storage')
-          instantiateStorageContract(storageApp.proxyAddress, ['yo'], wrapper)
+          const contract = instantiateStorageContract(storageApp.proxyAddress, ['yo'], wrapper)
+          contract.registerStorageProvider(items[activeProvider], 'https://infura.io')
         }}
       >
         Save changes
