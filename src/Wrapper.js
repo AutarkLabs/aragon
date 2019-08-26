@@ -405,6 +405,7 @@ class Wrapper extends React.PureComponent {
           walletNetwork={walletNetwork}
           walletWeb3={walletWeb3}
           walletProviderId={walletProviderId}
+          wrapper={wrapper}
         />
       )
     }
