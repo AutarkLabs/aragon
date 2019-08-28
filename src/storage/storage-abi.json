@@ -1,4 +1,4 @@
-[{
+{
   "contractName": "Storage",
   "abi": [
     {
@@ -381,21 +381,14 @@
   "ast": {
     "absolutePath": "/Users/beta/codes/aragon-storage/contracts/Storage.sol",
     "exportedSymbols": {
-      "Storage": [
-        115
-      ]
+      "Storage": [115]
     },
     "id": 116,
     "nodeType": "SourceUnit",
     "nodes": [
       {
         "id": 1,
-        "literals": [
-          "solidity",
-          "^",
-          "0.4",
-          ".24"
-        ],
+        "literals": ["solidity", "^", "0.4", ".24"],
         "nodeType": "PragmaDirective",
         "src": "0:24:0"
       },
@@ -1805,21 +1798,14 @@
   "legacyAST": {
     "absolutePath": "/Users/beta/codes/aragon-storage/contracts/Storage.sol",
     "exportedSymbols": {
-      "Storage": [
-        115
-      ]
+      "Storage": [115]
     },
     "id": 116,
     "nodeType": "SourceUnit",
     "nodes": [
       {
         "id": 1,
-        "literals": [
-          "solidity",
-          "^",
-          "0.4",
-          ".24"
-        ],
+        "literals": ["solidity", "^", "0.4", ".24"],
         "nodeType": "PragmaDirective",
         "src": "0:24:0"
       },
@@ -3233,4 +3219,4 @@
   "networks": {},
   "schemaVersion": "2.0.1",
   "updatedAt": "2019-08-23T21:45:54.444Z"
-}]
+}

@@ -1,36 +1,32 @@
-import tokens from '@aragon/templates-tokens'
-import { soliditySha3 } from '../web3-utils'
 import storageAbi from './storage-abi.json'
 
-export function testTokensEnabled(network) {
-  return !!tokens[network]
-}
-
 export const instantiateStorageContract = (address, wrapper) => {
-  const contract = new wrapper.web3.eth.Contract(storageAbi, address)
-  const returnContract = {}
-  const intentMethods = storageAbi[0].abi.filter(
-    item => item.type === 'function' && !item.constant
-  )
+  const contract = {}
+  storageAbi.abi
+    .filter(item => item.type === 'function' && !item.constant)
+    .forEach(
+      intentMethod =>
+        (contract[intentMethod.name] = async (...params) => {
+          const transactionPath = await wrapper.getExternalTransactionPath(
+            address,
+            intentMethod,
+            params
+          )
+          wrapper.performTransactionPath(transactionPath)
+        })
+    )
 
-  intentMethods.forEach(
-    method =>
-      (returnContract[method.name] = async (...params) => {
-        console.log('parms', params)
-        console.log('address', address)
-        console.log('method', method)
-        const transactionPath = await wrapper.getExternalTransactionPath(
-          address,
-          method,
-          params
-        )
-
-        console.log('transactionP', transactionPath)
-        wrapper.performTransactionPath(transactionPath)
-      })
-  )
-
-  return returnContract
+  storageAbi.abi
+    .filter(item => item.type === 'function' && item.constant)
+    .forEach(callMethod => {
+      const singleMethodContract = new wrapper.web3.eth.Contract(
+        [callMethod],
+        address
+      )
+      contract[callMethod.name] = (...params) =>
+        singleMethodContract.methods[callMethod.name](...params).call()
+    })
+  return contract
 }
 
 // export default {
