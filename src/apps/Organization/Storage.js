@@ -93,14 +93,32 @@ const Storage = ({ apps, wrapper }) => {
         disabled={smartContractProviderValue === items[activeProvider]}
         mode="strong"
         onClick={() => {
-          console.log('apps', apps)
-          const storageApp = apps.find(({name}) => name === 'Storage')
-          const contract = instantiateStorageContract(storageApp.proxyAddress, wrapper)
-          console.log(contract)
-          contract.registerStorageProvider(items[activeProvider], 'https://infura.io')
+          const storageApp = apps.find(({ name }) => name === 'Storage')
+          const contract = instantiateStorageContract(
+            storageApp.proxyAddress,
+            wrapper
+          )
+          contract.registerStorageProvider(
+            items[activeProvider],
+            'https://infura.io'
+          )
         }}
       >
         Save changes
+      </Button>
+      <Button
+        mode="strong"
+        onClick={async () => {
+          const storageApp = apps.find(({ name }) => name === 'Storage')
+          const contract = instantiateStorageContract(
+            storageApp.proxyAddress,
+            wrapper
+          )
+          const [provider, uri] = await contract.getStorageProvider()
+          console.log(provider, uri)
+        }}
+      >
+        Get smart contract
       </Button>
     </div>
   )
