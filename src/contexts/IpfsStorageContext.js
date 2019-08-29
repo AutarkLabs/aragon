@@ -8,6 +8,7 @@ export const IPFSStorageContext = createContext({})
 const IPFS_PROVIDER_CONNECTION_SUCCESS = 'ipfsProviderConnectionSuccess'
 const IPFS_PROVIDER_CONNECTION_FAILURE = 'ipfsProviderConnectionFailure'
 const IPFS_PROVIDER_CONNECTING = 'ipfsProviderConnecting'
+const IPFS_PROVIDER_FOUND = 'ipfsProviderFound'
 
 const initialStorageContextValue = {
   ipfsEndpoints: null,
@@ -15,6 +16,7 @@ const initialStorageContextValue = {
   [IPFS_PROVIDER_CONNECTION_SUCCESS]: false,
   [IPFS_PROVIDER_CONNECTION_FAILURE]: false,
   storageContract: null,
+  error: null,
 }
 
 const storeInCache = (wrapper, key, value) => {
@@ -196,6 +198,12 @@ const reducer = (state, action) => {
         [IPFS_PROVIDER_CONNECTION_SUCCESS]: false,
         [IPFS_PROVIDER_CONNECTION_FAILURE]: false,
       }
+    case IPFS_PROVIDER_FOUND:
+      return {
+        ...state,
+        ipfsProviderName: action.payload.provider,
+        ipfsProviderUri: action.payload.uri,
+      }
   }
 }
 
@@ -216,6 +224,14 @@ export const connecting = () => ({
   type: IPFS_PROVIDER_CONNECTING,
 })
 
+export const providerFound = (provider, uri) => ({
+  type: IPFS_PROVIDER_FOUND,
+  payload: {
+    provider,
+    uri,
+  },
+})
+
 export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
   const [ipfsStore, dispatchToIpfsStore] = useReducer(
     reducer,
@@ -232,6 +248,7 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
         const res = await storageContract.getStorageProvider()
         const provider = res['0']
         const uri = res['1']
+        dispatchToIpfsStore(providerFound(provider, uri))
         // get credentials from provider if there are any
         const { providerKey, providerSecret } = getStorageProviderCreds(wrapper)
         const ipfsEndpoints = await createIpfsProvider(
@@ -254,7 +271,7 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
   }, [apps, wrapper])
 
   return (
-    <IPFSStorageContext.Provider value={{ ipfsStore }}>
+    <IPFSStorageContext.Provider value={{ ...ipfsStore }}>
       {children}
     </IPFSStorageContext.Provider>
   )

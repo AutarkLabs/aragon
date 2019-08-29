@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import { Button, DropDown, TextInput, theme } from '@aragon/ui'
 import styled from 'styled-components'
 import { instantiateStorageContract } from '../../storage/storage-wrapper'
+import { useIpfs } from '../../hooks'
+import { IPFSStorageProvider } from '../../contexts/IpfsStorageContext'
 
 export const ARAGON_ASSOCIATION = 'ARAGON_ASSOCIATION'
 export const INFURA = 'INFURA'
@@ -43,10 +45,21 @@ const ProviderCredentialInputs = ({
 }
 
 const Storage = ({ apps, wrapper }) => {
-  const [activeProvider, setActiveProvider] = useState(0)
+  const {
+    ipfsProviderName,
+    ipfsEndpoints,
+    ipfsProviderConnectionSuccess,
+    ipfsProviderConnectionFailure,
+    ipfsProviderConnecting,
+    storageContract,
+    error,
+  } = useIpfs()
+
+  const [activeProvider, setActiveProvider] = useState(
+    items.indexOf(ipfsProviderName)
+  )
   const [value1, setValue1] = useState('')
   const [value2, setValue2] = useState('')
-  const smartContractProviderValue = ARAGON_ASSOCIATION
 
   return (
     <div>
@@ -89,35 +102,16 @@ const Storage = ({ apps, wrapper }) => {
         </MarginBottom>
       </MarginBottom>
       <Button
-        disabled={smartContractProviderValue === items[activeProvider]}
+        disabled={ipfsProviderName === items[activeProvider]}
         mode="strong"
         onClick={() => {
-          const storageApp = apps.find(({ name }) => name === 'Storage')
-          const contract = instantiateStorageContract(
-            storageApp.proxyAddress,
-            wrapper
-          )
-          contract.registerStorageProvider(
+          storageContract.registerStorageProvider(
             items[activeProvider],
             'https://infura.io'
           )
         }}
       >
         Save changes
-      </Button>
-      <Button
-        mode="strong"
-        onClick={async () => {
-          const storageApp = apps.find(({ name }) => name === 'Storage')
-          const contract = instantiateStorageContract(
-            storageApp.proxyAddress,
-            wrapper
-          )
-          const [provider, uri] = await contract.getStorageProvider()
-          console.log(provider, uri)
-        }}
-      >
-        Get smart contract
       </Button>
     </div>
   )

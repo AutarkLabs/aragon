@@ -13,6 +13,7 @@ import {
 } from './components/IdentityManager/IdentityManager'
 import keycodes from './keycodes'
 import { log, removeStartingSlash } from './utils'
+import { IPFSStorageContext } from './contexts/IpfsStorageContext'
 
 // Update `now` at a given interval.
 export function useNow(updateEvery = 1000) {
@@ -302,4 +303,28 @@ export function useLocalIdentity(entity) {
   }, [identityEvents$, handleResolve, entity])
 
   return { name }
+}
+
+export const useIpfs = () => {
+  const {
+    ipfsProviderName,
+    ipfsProviderUri,
+    ipfsEndpoints,
+    ipfsProviderConnectionSuccess,
+    ipfsProviderConnectionFailure,
+    ipfsProviderConnecting,
+    storageContract,
+    error,
+  } = useContext(IPFSStorageContext)
+
+  return {
+    ipfsProviderName,
+    ipfsProviderUri,
+    ipfsEndpoints,
+    ipfsProviderConnectionSuccess,
+    ipfsProviderConnectionFailure,
+    ipfsProviderConnecting,
+    storageContract,
+    error,
+  }
 }
