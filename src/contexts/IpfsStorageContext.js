@@ -1,5 +1,5 @@
 import React, { useState, createContext, useEffect } from 'react'
-import { instantiateStorageContract } from '../../storage/storage-wrapper'
+import { instantiateStorageContract } from '../storage/storage-wrapper'
 
 export const IPFSStorageContext = createContext({})
 
@@ -165,17 +165,23 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
   )
 
   const storageApp = apps.find(({ name }) => name === 'Storage')
-
+  console.log('storage app: ', storageApp)
   if (storageApp) {
     storeInCache(wrapper, 'zach', 'Gareth11').then(res => {
       console.log('res', res)
     })
 
     getFromCache(wrapper, 'zach').subscribe({
-      next(x) { console.log('got value ' + x); },
-      error(err) { console.error('something wrong occurred: ' + err); },
-      complete() { console.log('done'); }
-    });
+      next(x) {
+        console.log('got value ' + x)
+      },
+      error(err) {
+        console.error('something wrong occurred: ' + err)
+      },
+      complete() {
+        console.log('done')
+      },
+    })
 
     const contract = instantiateStorageContract(
       storageApp.proxyAddress,

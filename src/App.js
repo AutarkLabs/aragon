@@ -19,9 +19,8 @@ import { PermissionsProvider } from './contexts/PermissionsContext'
 import { ModalProvider } from './components/ModalManager/ModalManager'
 import { IdentityProvider } from './components/IdentityManager/IdentityManager'
 import { LocalIdentityModalProvider } from './components/LocalIdentityModal/LocalIdentityModalManager'
-import { IPFSStorageProvider } from './components/StorageManager/StorageManager'
+import { IPFSStorageProvider } from './contexts/IpfsStorageContext'
 import LocalIdentityModal from './components/LocalIdentityModal/LocalIdentityModal'
-import HelpScoutBeacon from './components/HelpScoutBeacon/HelpScoutBeacon'
 import { HelpScoutProvider } from './components/HelpScoutBeacon/useHelpScout'
 import { isKnownRepo } from './repo-utils'
 import {
@@ -486,7 +485,6 @@ class App extends React.Component {
                         walletProviderId={walletProviderId}
                       />
                     </div>
-
                   </ActivityProvider>
                 </FavoriteDaosProvider>
               </LocalIdentityModalProvider>
