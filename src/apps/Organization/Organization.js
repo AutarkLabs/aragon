@@ -21,7 +21,12 @@ import {
 import LocalIdentityBadge from '../../components/IdentityBadge/LocalIdentityBadge'
 import { appIds, network } from '../../environment'
 import { sanitizeNetworkType } from '../../network-config'
-import { AppType, DaoAddressType, EthereumAddressType, AragonType } from '../../prop-types'
+import {
+  AppType,
+  DaoAddressType,
+  EthereumAddressType,
+  AragonType,
+} from '../../prop-types'
 import providerString from '../../provider-strings'
 import airdrop, { testTokensEnabled } from '../../testnet/airdrop'
 import { toChecksumAddress } from '../../web3-utils'
@@ -219,7 +224,7 @@ const Organization = React.memo(function Organization({
   walletNetwork,
   walletWeb3,
   walletProviderId,
-  wrapper
+  wrapper,
 }) {
   const theme = useTheme()
   const { layoutName } = useLayout()
@@ -419,7 +424,7 @@ const Organization = React.memo(function Organization({
           <Section heading="Configuration">
             <Storage apps={apps} wrapper={wrapper} />
           </Section>
-          <Section heading="Manual Upload"></Section>
+          <Section heading="Manual Upload" />
         </React.Fragment>
       )}
       {selectedTab === 3 && (
@@ -463,7 +468,7 @@ Organization.propTypes = {
   walletNetwork: PropTypes.string.isRequired,
   walletWeb3: PropTypes.object.isRequired,
   walletProviderId: PropTypes.string.isRequired,
-  wrapper: AragonType
+  wrapper: AragonType,
 }
 
 const Section = ({ ...props }) => {
