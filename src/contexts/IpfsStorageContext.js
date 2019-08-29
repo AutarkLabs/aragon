@@ -1,13 +1,19 @@
-import React, { useState, createContext, useEffect } from 'react'
+import React, { useReducer, createContext, useEffect } from 'react'
+import PropTypes from 'prop-types'
 import { instantiateStorageContract } from '../storage/storage-wrapper'
+import { AppType, AragonType } from '../prop-types'
 
 export const IPFSStorageContext = createContext({})
 
+const IPFS_PROVIDER_CONNECTION_SUCCESS = 'ipfsProviderConnectionSuccess'
+const IPFS_PROVIDER_CONNECTION_FAILURE = 'ipfsProviderConnectionFailure'
+const IPFS_PROVIDER_CONNECTING = 'ipfsProviderConnecting'
+
 const initialStorageContextValue = {
-  ipfsObj: null,
-  connectingToIpfsObj: false,
-  connectedToIpfsObjSuccessfully: false,
-  connectedToIpfsObjFailure: false,
+  ipfsEndpoints: null,
+  [IPFS_PROVIDER_CONNECTING]: false,
+  [IPFS_PROVIDER_CONNECTION_SUCCESS]: false,
+  [IPFS_PROVIDER_CONNECTION_FAILURE]: false,
   storageContract: null,
 }
 
@@ -162,38 +168,100 @@ const getTemporalNode = async (username, password) => {
   }
 }
 
+const reducer = (state, action) => {
+  switch (action.type) {
+    case IPFS_PROVIDER_CONNECTION_SUCCESS:
+      return {
+        ...state,
+        ipfsEndpoints: action.payload.ipfsEndpoints,
+        [IPFS_PROVIDER_CONNECTING]: false,
+        [IPFS_PROVIDER_CONNECTION_SUCCESS]: true,
+        [IPFS_PROVIDER_CONNECTION_FAILURE]: false,
+        storageContract: action.payload.storageContract,
+      }
+    case IPFS_PROVIDER_CONNECTION_FAILURE:
+      return {
+        ...state,
+        ipfsEndpoints: null,
+        [IPFS_PROVIDER_CONNECTING]: false,
+        [IPFS_PROVIDER_CONNECTION_SUCCESS]: false,
+        [IPFS_PROVIDER_CONNECTION_FAILURE]: true,
+        error: action.error,
+      }
+    case IPFS_PROVIDER_CONNECTING:
+      return {
+        ...state,
+        ipfsEndpoints: null,
+        [IPFS_PROVIDER_CONNECTING]: true,
+        [IPFS_PROVIDER_CONNECTION_SUCCESS]: false,
+        [IPFS_PROVIDER_CONNECTION_FAILURE]: false,
+      }
+  }
+}
+
+export const connectionSuccess = (ipfsEndpoints, storageContract) => ({
+  type: IPFS_PROVIDER_CONNECTION_SUCCESS,
+  payload: {
+    ipfsEndpoints,
+    storageContract,
+  },
+})
+
+export const connectionFailure = error => ({
+  type: IPFS_PROVIDER_CONNECTION_FAILURE,
+  error,
+})
+
+export const connecting = () => ({
+  type: IPFS_PROVIDER_CONNECTING,
+})
+
 export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
-  const [storageContextStore, setStorageContextStore] = useState(
+  const [ipfsStore, dispatchToIpfsStore] = useReducer(
+    reducer,
     initialStorageContextValue
   )
 
   useEffect(() => {
     const getStorageProvider = async storageApp => {
-      const contract = instantiateStorageContract(
-        storageApp.proxyAddress,
-        wrapper
-      )
-      const [provider, uri] = await contract.getStorageProvider()
-      // get credentials from provider if there are any
-      const { providerKey, providerSecret } = getStorageProviderCreds(wrapper)
-      const ipfsProvider = await createIpfsProvider(
-        provider,
-        uri,
-        providerKey,
-        providerSecret
-      )
+      try {
+        const storageContract = instantiateStorageContract(
+          storageApp.proxyAddress,
+          wrapper
+        )
+        const res = await storageContract.getStorageProvider()
+        const provider = res['0']
+        const uri = res['1']
+        // get credentials from provider if there are any
+        const { providerKey, providerSecret } = getStorageProviderCreds(wrapper)
+        const ipfsEndpoints = await createIpfsProvider(
+          provider,
+          uri,
+          providerKey,
+          providerSecret
+        )
 
-      return ipfsProvider
+        dispatchToIpfsStore(connectionSuccess(ipfsEndpoints, storageContract))
+      } catch (error) {
+        dispatchToIpfsStore(connectionFailure(error))
+      }
     }
     const storageApp = apps.find(({ name }) => name === 'Storage')
     if (storageApp) {
+      dispatchToIpfsStore(connecting())
       getStorageProvider(storageApp)
     }
   }, [apps, wrapper])
 
   return (
-    <IPFSStorageContext.Provider value={{ storageContextStore }}>
+    <IPFSStorageContext.Provider value={{ ipfsStore }}>
       {children}
     </IPFSStorageContext.Provider>
   )
+}
+
+IPFSStorageProvider.propTypes = {
+  apps: PropTypes.arrayOf(AppType),
+  children: PropTypes.node.isRequired,
+  wrapper: AragonType,
 }

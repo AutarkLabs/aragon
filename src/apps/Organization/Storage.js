@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { Button, DropDown, TextInput, theme } from '@aragon/ui'
 import styled from 'styled-components'
@@ -43,7 +43,6 @@ const ProviderCredentialInputs = ({
 }
 
 const Storage = ({ apps, wrapper }) => {
-  console.log('warpper,', wrapper)
   const [activeProvider, setActiveProvider] = useState(0)
   const [value1, setValue1] = useState('')
   const [value2, setValue2] = useState('')
