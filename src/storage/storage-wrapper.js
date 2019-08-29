@@ -12,7 +12,7 @@ export const instantiateStorageContract = (address, wrapper) => {
             intentMethod,
             params
           )
-          wrapper.performTransactionPath(transactionPath)
+          return wrapper.performTransactionPath(transactionPath)
         })
     )
 
@@ -28,13 +28,3 @@ export const instantiateStorageContract = (address, wrapper) => {
     })
   return contract
 }
-
-// export default {
-//   set: async (wrapper, storageAddr, values) => {},
-//   get: (web3, storageAddr, from, paramName) =>
-//     getContract(web3, storageAddr)
-//       .methods.getRegisteredData(soliditySha3(paramName))
-//       .call({ from: from }),
-//   subscribe: (web3, storageAddr, paramName, callback) =>
-//     getContract(web3, storageAddr).events.Registered(paramName, callback),
-// }

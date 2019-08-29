@@ -2,9 +2,8 @@ import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { Button, DropDown, TextInput, theme } from '@aragon/ui'
 import styled from 'styled-components'
-import { instantiateStorageContract } from '../../storage/storage-wrapper'
 import { useIpfs } from '../../hooks'
-import { IPFSStorageProvider } from '../../contexts/IpfsStorageContext'
+import { AppType, AragonType } from '../../prop-types'
 
 export const ARAGON_ASSOCIATION = 'ARAGON_ASSOCIATION'
 export const INFURA = 'INFURA'
@@ -12,55 +11,61 @@ export const PINATA = 'PINATA'
 export const TEMPORAL_CLOUD = 'TEMPORAL_CLOUD'
 
 const items = [ARAGON_ASSOCIATION, INFURA, PINATA, TEMPORAL_CLOUD]
+const apiEndpoints = [
+  'https://api.pinata.cloud',
+  'https://ipfs.infura.io:5001',
+  'https://api.pinata.cloud',
+  'https://api.ipfs.temporal.cloud',
+]
 
 const ProviderCredentialInputs = ({
-  input1,
-  input2,
-  value1,
-  value2,
-  setValue1,
-  setValue2,
+  providerKeyInput,
+  providerSecretInput,
+  providerKey,
+  providerSecret,
+  setProviderKey,
+  setProviderSecret,
 }) => {
   return (
     <InputsContainer>
       <InputContainer css={{ marginRight: '10px' }}>
-        <SettingsLabel>{input1}</SettingsLabel>
+        <SettingsLabel>{providerKeyInput}</SettingsLabel>
         <TextInput
           wide
-          value={value1}
-          onChange={event => setValue1(event.target.value)}
+          value={providerKey}
+          onChange={event => setProviderKey(event.target.value)}
         />
       </InputContainer>
       <InputContainer css={{ marginLeft: '10px' }}>
-        <SettingsLabel>{input2}</SettingsLabel>
+        <SettingsLabel>{providerSecretInput}</SettingsLabel>
         <TextInput
           wide
           type="password"
-          value={value2}
-          onChange={event => setValue2(event.target.value)}
+          value={providerSecret}
+          onChange={event => setProviderSecret(event.target.value)}
         />
       </InputContainer>
     </InputsContainer>
   )
 }
 
+ProviderCredentialInputs.propTypes = {
+  providerKeyInput: PropTypes.string.isRequired,
+  providerSecretInput: PropTypes.string.isRequired,
+  providerKey: PropTypes.string.isRequired,
+  providerSecret: PropTypes.string.isRequired,
+  setProviderKey: PropTypes.func.isRequired,
+  setProviderSecret: PropTypes.func.isRequired,
+}
+
 const Storage = ({ apps, wrapper }) => {
-  const {
-    ipfsProviderName,
-    ipfsEndpoints,
-    ipfsProviderConnectionSuccess,
-    ipfsProviderConnectionFailure,
-    ipfsProviderConnecting,
-    storageContract,
-    error,
-  } = useIpfs()
+  const { ipfsProviderName, updateIpfsProvider } = useIpfs()
 
   const [activeProvider, setActiveProvider] = useState(
     items.indexOf(ipfsProviderName)
   )
-  const [value1, setValue1] = useState('')
-  const [value2, setValue2] = useState('')
-
+  const [providerKey, setProviderKey] = useState('')
+  const [providerSecret, setProviderSecret] = useState('')
   return (
     <div>
       <MarginBottom>
@@ -81,22 +86,22 @@ const Storage = ({ apps, wrapper }) => {
         <MarginBottom>
           {activeProvider === 2 && (
             <ProviderCredentialInputs
-              input1="Key"
-              input2="Secret"
-              value1={value1}
-              value2={value2}
-              setValue1={setValue1}
-              setValue2={setValue2}
+              providerKeyInput="Key"
+              providerSecretInput="Secret"
+              providerKey={providerKey}
+              providerSecret={providerSecret}
+              setProviderKey={setProviderKey}
+              setProviderSecret={setProviderSecret}
             />
           )}
           {activeProvider === 3 && (
             <ProviderCredentialInputs
-              input1="Username"
-              input2="Password"
-              value1={value1}
-              value2={value2}
-              setValue1={setValue1}
-              setValue2={setValue2}
+              providerKeyInput="Username"
+              providerSecretInput="Password"
+              providerKey={providerKey}
+              providerSecret={providerSecret}
+              setProviderKey={setProviderKey}
+              setProviderSecret={setProviderSecret}
             />
           )}
         </MarginBottom>
@@ -104,17 +109,24 @@ const Storage = ({ apps, wrapper }) => {
       <Button
         disabled={ipfsProviderName === items[activeProvider]}
         mode="strong"
-        onClick={() => {
-          storageContract.registerStorageProvider(
+        onClick={() =>
+          updateIpfsProvider(
             items[activeProvider],
-            'https://infura.io'
+            apiEndpoints[activeProvider],
+            providerKey,
+            providerSecret
           )
-        }}
+        }
       >
         Save changes
       </Button>
     </div>
   )
+}
+
+Storage.propTypes = {
+  apps: PropTypes.arrayOf(AppType),
+  wrapper: AragonType,
 }
 
 const InputsContainer = styled.div`

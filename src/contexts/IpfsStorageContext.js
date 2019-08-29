@@ -1,4 +1,10 @@
-import React, { useReducer, createContext, useEffect } from 'react'
+import React, {
+  useReducer,
+  createContext,
+  useEffect,
+  useCallback,
+  useState,
+} from 'react'
 import PropTypes from 'prop-types'
 import { instantiateStorageContract } from '../storage/storage-wrapper'
 import { AppType, AragonType } from '../prop-types'
@@ -15,7 +21,6 @@ const initialStorageContextValue = {
   [IPFS_PROVIDER_CONNECTING]: false,
   [IPFS_PROVIDER_CONNECTION_SUCCESS]: false,
   [IPFS_PROVIDER_CONNECTION_FAILURE]: false,
-  storageContract: null,
   error: null,
 }
 
@@ -25,18 +30,6 @@ const storeInCache = (wrapper, key, value) => {
 
 const getFromCache = (wrapper, key) => {
   return wrapper.cache.observe(key)
-}
-
-const getStorageProviderCreds = async (provider, wrapper) => {
-  // const creds = await getFromCache(wrapper, provider).toPromise()
-  const creds = {
-    providerKey: '',
-    providerSecret: '',
-  }
-  return {
-    providerKey: creds.providerKey,
-    providerSecret: creds.providerSecret,
-  }
 }
 
 const createIpfsProvider = async (
@@ -179,7 +172,6 @@ const reducer = (state, action) => {
         [IPFS_PROVIDER_CONNECTING]: false,
         [IPFS_PROVIDER_CONNECTION_SUCCESS]: true,
         [IPFS_PROVIDER_CONNECTION_FAILURE]: false,
-        storageContract: action.payload.storageContract,
       }
     case IPFS_PROVIDER_CONNECTION_FAILURE:
       return {
@@ -207,11 +199,10 @@ const reducer = (state, action) => {
   }
 }
 
-export const connectionSuccess = (ipfsEndpoints, storageContract) => ({
+export const connectionSuccess = ipfsEndpoints => ({
   type: IPFS_PROVIDER_CONNECTION_SUCCESS,
   payload: {
     ipfsEndpoints,
-    storageContract,
   },
 })
 
@@ -237,6 +228,40 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
     reducer,
     initialStorageContextValue
   )
+  const [storageContract, setStorageContract] = useState({})
+
+  const updateIpfsProvider = useCallback(
+    (provider, uri, providerKey, providerSecret) => {
+      const update = async () => {
+        try {
+          storeInCache(wrapper, provider, {
+            providerKey,
+            providerSecret,
+          })
+          await storageContract.registerStorageProvider(provider, uri)
+          dispatchToIpfsStore(providerFound(provider, uri))
+          getFromCache(wrapper, provider).subscribe(
+            async ({ providerKey = '', providerSecret = '' }) => {
+              const ipfsEndpoints = await createIpfsProvider(
+                provider,
+                uri,
+                providerKey,
+                providerSecret
+              )
+
+              dispatchToIpfsStore(connectionSuccess(ipfsEndpoints))
+            }
+          )
+        } catch (error) {
+          dispatchToIpfsStore(connectionFailure(error))
+        }
+      }
+      update()
+    },
+    [wrapper, storageContract]
+  )
+
+  const storageApp = apps.find(({ name }) => name === 'Storage')
 
   useEffect(() => {
     const getStorageProvider = async storageApp => {
@@ -245,33 +270,36 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
           storageApp.proxyAddress,
           wrapper
         )
+        setStorageContract(storageContract)
         const res = await storageContract.getStorageProvider()
         const provider = res['0']
         const uri = res['1']
         dispatchToIpfsStore(providerFound(provider, uri))
-        // get credentials from provider if there are any
-        const { providerKey, providerSecret } = getStorageProviderCreds(wrapper)
-        const ipfsEndpoints = await createIpfsProvider(
-          provider,
-          uri,
-          providerKey,
-          providerSecret
-        )
+        getFromCache(wrapper, provider).subscribe(
+          async ({ providerKey, providerSecret }) => {
+            const ipfsEndpoints = await createIpfsProvider(
+              provider,
+              uri,
+              providerKey,
+              providerSecret
+            )
 
-        dispatchToIpfsStore(connectionSuccess(ipfsEndpoints, storageContract))
+            dispatchToIpfsStore(connectionSuccess(ipfsEndpoints))
+          }
+        )
       } catch (error) {
         dispatchToIpfsStore(connectionFailure(error))
       }
     }
-    const storageApp = apps.find(({ name }) => name === 'Storage')
+
     if (storageApp) {
       dispatchToIpfsStore(connecting())
       getStorageProvider(storageApp)
     }
-  }, [apps, wrapper])
+  }, [wrapper, storageApp])
 
   return (
-    <IPFSStorageContext.Provider value={{ ...ipfsStore }}>
+    <IPFSStorageContext.Provider value={{ ...ipfsStore, updateIpfsProvider }}>
       {children}
     </IPFSStorageContext.Provider>
   )
