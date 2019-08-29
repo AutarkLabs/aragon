@@ -11,16 +11,6 @@ const initialStorageContextValue = {
   storageContract: null,
 }
 
-const fetchAndConfigureAllTheThings = () => {
-  return {
-    ipfsObj: null,
-    connectingToIpfsObj: true,
-    connectedToIpfsObjSuccessfully: false,
-    connectedToIpfsObjFailure: false,
-    storageContract: null,
-  }
-}
-
 const storeInCache = (wrapper, key, value) => {
   return wrapper.cache.set(key, value)
 }
@@ -29,18 +19,31 @@ const getFromCache = (wrapper, key) => {
   return wrapper.cache.observe(key)
 }
 
+const getStorageProviderCreds = async (provider, wrapper) => {
+  // const creds = await getFromCache(wrapper, provider).toPromise()
+  const creds = {
+    providerKey: '',
+    providerSecret: '',
+  }
+  return {
+    providerKey: creds.providerKey,
+    providerSecret: creds.providerSecret,
+  }
+}
+
 const createIpfsProvider = async (
   provider,
-  providerId = '',
+  uri,
+  providerKey = '',
   providerSecret = ''
 ) => {
-  switch (provider) {
+  switch (provider.toLowerCase()) {
     case 'pinata':
-      return getPinataNode(providerId, providerSecret)
+      return getPinataNode(providerKey, providerSecret)
     case 'infura':
       return getInfuraNode()
     case 'temporal':
-      return getTemporalNode(providerId, providerSecret)
+      return getTemporalNode(providerKey, providerSecret)
   }
 }
 
@@ -164,44 +167,29 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
     initialStorageContextValue
   )
 
-  const storageApp = apps.find(({ name }) => name === 'Storage')
-  console.log('storage app: ', storageApp)
-  if (storageApp) {
-    storeInCache(wrapper, 'zach', 'Gareth11').then(res => {
-      console.log('res', res)
-    })
+  useEffect(() => {
+    const getStorageProvider = async storageApp => {
+      const contract = instantiateStorageContract(
+        storageApp.proxyAddress,
+        wrapper
+      )
+      const [provider, uri] = await contract.getStorageProvider()
+      // get credentials from provider if there are any
+      const { providerKey, providerSecret } = getStorageProviderCreds(wrapper)
+      const ipfsProvider = await createIpfsProvider(
+        provider,
+        uri,
+        providerKey,
+        providerSecret
+      )
 
-    getFromCache(wrapper, 'zach').subscribe({
-      next(x) {
-        console.log('got value ' + x)
-      },
-      error(err) {
-        console.error('something wrong occurred: ' + err)
-      },
-      complete() {
-        console.log('done')
-      },
-    })
-
-    const contract = instantiateStorageContract(
-      storageApp.proxyAddress,
-      wrapper
-    )
-
-    contract.getStorageProvider().then(res => {
-      console.log('res', res)
-    })
-
-    // Stubbing in creds
-    createIpfsProvider('temporal', 'zach', 'Gareth11').then(res => {
-      console.log('res', res)
-    })
-  }
-
-  // useEffect(() => {
-  //   const storage = fetchAndConfigureAllTheThings() // fetch and configure all the necessary things
-  //   setStorageContextStore(storage)
-  // }, [])
+      return ipfsProvider
+    }
+    const storageApp = apps.find(({ name }) => name === 'Storage')
+    if (storageApp) {
+      getStorageProvider(storageApp)
+    }
+  }, [apps, wrapper])
 
   return (
     <IPFSStorageContext.Provider value={{ storageContextStore }}>
