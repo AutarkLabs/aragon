@@ -4,6 +4,7 @@ import { Button, DropDown, TextInput, theme } from '@aragon/ui'
 import styled from 'styled-components'
 import { useIpfs } from '../../hooks'
 import { AppType, AragonType } from '../../prop-types'
+import noResultsSvg from '../../components/GlobalPreferences/CustomLabels/no-results.svg'
 
 export const ARAGON_ASSOCIATION = 'ARAGON_ASSOCIATION'
 export const INFURA = 'INFURA'
@@ -59,7 +60,11 @@ ProviderCredentialInputs.propTypes = {
 }
 
 const Storage = ({ apps, wrapper }) => {
-  const { ipfsProviderName, updateIpfsProvider } = useIpfs()
+  const {
+    ipfsProviderName,
+    updateIpfsProvider,
+    isStorageAppInstalled,
+  } = useIpfs()
 
   const [activeProvider, setActiveProvider] = useState(
     items.indexOf(ipfsProviderName)
@@ -67,60 +72,66 @@ const Storage = ({ apps, wrapper }) => {
   const [providerKey, setProviderKey] = useState('')
   const [providerSecret, setProviderSecret] = useState('')
   return (
-    <div>
-      <MarginBottom>
-        <MarginBottom>
-          <SettingsLabel>Provider</SettingsLabel>
-          <DropDown
-            css={{ width: '300px' }}
-            items={items.map(item => {
-              if (item === ARAGON_ASSOCIATION) return 'Aragon Association'
-              if (item === INFURA) return 'Infura'
-              if (item === PINATA) return 'Pinata'
-              if (item === TEMPORAL_CLOUD) return 'Temporal Cloud'
-            })}
-            selected={activeProvider}
-            onChange={setActiveProvider}
-          />
-        </MarginBottom>
-        <MarginBottom>
-          {activeProvider === 2 && (
-            <ProviderCredentialInputs
-              providerKeyInput="Key"
-              providerSecretInput="Secret"
-              providerKey={providerKey}
-              providerSecret={providerSecret}
-              setProviderKey={setProviderKey}
-              setProviderSecret={setProviderSecret}
-            />
-          )}
-          {activeProvider === 3 && (
-            <ProviderCredentialInputs
-              providerKeyInput="Username"
-              providerSecretInput="Password"
-              providerKey={providerKey}
-              providerSecret={providerSecret}
-              setProviderKey={setProviderKey}
-              setProviderSecret={setProviderSecret}
-            />
-          )}
-        </MarginBottom>
-      </MarginBottom>
-      <Button
-        disabled={ipfsProviderName === items[activeProvider]}
-        mode="strong"
-        onClick={() =>
-          updateIpfsProvider(
-            items[activeProvider],
-            apiEndpoints[activeProvider],
-            providerKey,
-            providerSecret
-          )
-        }
-      >
-        Save changes
-      </Button>
-    </div>
+    <StorageWrapper>
+      {!isStorageAppInstalled ? (
+        <NoStorageCard />
+      ) : (
+        <React.Fragment>
+          <MarginBottom>
+            <MarginBottom>
+              <SettingsLabel>Provider</SettingsLabel>
+              <DropDown
+                css={{ width: '300px' }}
+                items={items.map(item => {
+                  if (item === ARAGON_ASSOCIATION) return 'Aragon Association'
+                  if (item === INFURA) return 'Infura'
+                  if (item === PINATA) return 'Pinata'
+                  if (item === TEMPORAL_CLOUD) return 'Temporal Cloud'
+                })}
+                selected={activeProvider}
+                onChange={setActiveProvider}
+              />
+            </MarginBottom>
+            <MarginBottom>
+              {activeProvider === 2 && (
+                <ProviderCredentialInputs
+                  providerKeyInput="Key"
+                  providerSecretInput="Secret"
+                  providerKey={providerKey}
+                  providerSecret={providerSecret}
+                  setProviderKey={setProviderKey}
+                  setProviderSecret={setProviderSecret}
+                />
+              )}
+              {activeProvider === 3 && (
+                <ProviderCredentialInputs
+                  providerKeyInput="Username"
+                  providerSecretInput="Password"
+                  providerKey={providerKey}
+                  providerSecret={providerSecret}
+                  setProviderKey={setProviderKey}
+                  setProviderSecret={setProviderSecret}
+                />
+              )}
+            </MarginBottom>
+          </MarginBottom>
+          <Button
+            disabled={ipfsProviderName === items[activeProvider]}
+            mode="strong"
+            onClick={() =>
+              updateIpfsProvider(
+                items[activeProvider],
+                apiEndpoints[activeProvider],
+                providerKey,
+                providerSecret
+              )
+            }
+          >
+            Save changes
+          </Button>
+        </React.Fragment>
+      )}
+    </StorageWrapper>
   )
 }
 
@@ -145,5 +156,36 @@ const SettingsLabel = styled.div`
 const MarginBottom = styled.div`
   margin-bottom: 20px;
 `
+const NoStorageCard = () => (
+  <div
+    css={`
+      margin-top: 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    `}
+  >
+    <img
+      css={`
+        margin: 56px 0;
+      `}
+      src={noResultsSvg}
+      alt="No results"
+    />
+    <h3
+      css={`
+        font-size: 28px;
+        color: ${theme.content};
+        margin-bottom: 14px;
+      `}
+    >
+      No storage app yet.
+    </h3>
+  </div>
+)
 
+const StorageWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+`
 export default Storage
