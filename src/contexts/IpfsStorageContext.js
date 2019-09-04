@@ -43,7 +43,7 @@ const createIpfsProvider = async (
       return getPinataNode(providerKey, providerSecret)
     case 'infura':
       return getInfuraNode()
-    case 'temporal':
+    case 'temporal_cloud':
       return getTemporalNode(providerKey, providerSecret)
   }
 }
@@ -67,27 +67,30 @@ const pinataNode = (key, secret) => {
   const pinataDagGetEndpoint = `https://api.pinata.cloud/data/pinList`
 
   return {
-    dagGet: async () => {
-      const response = await fetch(pinataDagGetEndpoint, {
-        method: 'GET',
-        headers: {
-          pinata_api_key: key,
-          pinata_secret_api_key: secret,
-        },
-      })
-      return response.json()
-    },
-    dagPut: async json => {
-      const response = await fetch(pinataPutEndpoint, {
-        method: 'POST',
-        headers: {
-          pinata_api_key: key,
-          pinata_secret_api_key: secret,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ pinataContent: json }),
-      })
-      return response.json()
+    dag: {
+      get: async () => {
+        const response = await fetch(pinataDagGetEndpoint, {
+          method: 'GET',
+          headers: {
+            pinata_api_key: key,
+            pinata_secret_api_key: secret,
+          },
+        })
+        return response.json()
+      },
+      put: async json => {
+        const response = await fetch(pinataPutEndpoint, {
+          method: 'POST',
+          headers: {
+            pinata_api_key: key,
+            pinata_secret_api_key: secret,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ v0: json }),
+        })
+        const { IpfsHash } = await response.json()
+        return { cid: IpfsHash }
+      },
     },
   }
 }
@@ -97,21 +100,24 @@ const getInfuraNode = () => {
   const putEndpoint = `https://ipfs.infura.io:5001/api/v0/dag/put`
 
   return {
-    dagGet: async hash => {
-      const url = `${getEndpoint}${hash}`
-      const response = await fetch(url, {
-        method: 'GET',
-      })
-      return response.json()
-    },
-    dagPut: async json => {
-      let data = new FormData()
-      data.append('v0', JSON.stringify(json))
-      const response = await fetch(putEndpoint, {
-        method: 'POST',
-        body: data,
-      })
-      return response.json()
+    dag: {
+      get: async hash => {
+        const url = `${getEndpoint}${hash}`
+        const response = await fetch(url, {
+          method: 'GET',
+        })
+        return response.json()
+      },
+      put: async json => {
+        let data = new FormData()
+        data.append('v0', JSON.stringify(json))
+        const response = await fetch(putEndpoint, {
+          method: 'POST',
+          body: data,
+        })
+        const { Cid } = await response.json()
+        return { cid: Cid['/'] }
+      },
     },
   }
 }
@@ -132,33 +138,35 @@ const getTemporalNode = async (username, password) => {
   const { token } = await authData.json()
 
   return {
-    dagGet: async hash => {
-      const url = `${getEndpoint}${hash}`
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          Authorization: 'Bearer ' + token,
-        },
-      })
-      return response.json()
-    },
-    dagPut: async () => {
-      let key = Math.random().toString()
-      let val = Math.random().toString()
-      let blob = new Blob([{ [key]: val }], {
-        type: 'application/json',
-      })
-      let formData = new FormData()
-      formData.append('hold_time', '1')
-      formData.append('file', blob)
-      const response = await fetch(putEndpoint, {
-        method: 'POST',
-        headers: {
-          Authorization: 'Bearer ' + token,
-        },
-        body: formData,
-      })
-      return response.json()
+    dag: {
+      get: async hash => {
+        const url = `${getEndpoint}${hash}`
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            Authorization: 'Bearer ' + token,
+          },
+        })
+        return response.json()
+      },
+      put: async () => {
+        let key = Math.random().toString()
+        let val = Math.random().toString()
+        let blob = new Blob([{ [key]: val }], {
+          type: 'application/json',
+        })
+        let formData = new FormData()
+        formData.append('hold_time', '1')
+        formData.append('file', blob)
+        const response = await fetch(putEndpoint, {
+          method: 'POST',
+          headers: {
+            Authorization: 'Bearer ' + token,
+          },
+          body: formData,
+        })
+        return response.json()
+      },
     },
   }
 }
