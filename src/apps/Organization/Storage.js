@@ -159,7 +159,7 @@ const MarginBottom = styled.div`
 const NoStorageCard = () => (
   <div
     css={`
-      margin-top: 56px;
+      margin: 56px;
       display: flex;
       flex-direction: column;
       align-items: center;
