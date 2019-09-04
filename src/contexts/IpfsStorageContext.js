@@ -64,19 +64,15 @@ const getPinataNode = async (key, secret) => {
 
 const pinataNode = (key, secret) => {
   const pinataPutEndpoint = `https://api.pinata.cloud/pinning/pinJSONToIPFS`
-  const pinataDagGetEndpoint = `https://api.pinata.cloud/data/pinList`
+  const pinataGatewayEndpoint =
+    'https://gateway.pinata.cloud/api/v0/object/get?arg=/ipfs'
 
   return {
     dag: {
-      get: async () => {
-        const response = await fetch(pinataDagGetEndpoint, {
-          method: 'GET',
-          headers: {
-            pinata_api_key: key,
-            pinata_secret_api_key: secret,
-          },
-        })
-        return response.json()
+      get: async cid => {
+        const response = await fetch(`${pinataGatewayEndpoint}/${cid}`)
+        const res = await response.json()
+        return res.Data
       },
       put: async json => {
         const response = await fetch(pinataPutEndpoint, {
@@ -86,7 +82,7 @@ const pinataNode = (key, secret) => {
             pinata_secret_api_key: secret,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ v0: json }),
+          body: JSON.stringify(json),
         })
         const { IpfsHash } = await response.json()
         return { cid: IpfsHash }
@@ -101,8 +97,8 @@ const getInfuraNode = () => {
 
   return {
     dag: {
-      get: async hash => {
-        const url = `${getEndpoint}${hash}`
+      get: async cid => {
+        const url = `${getEndpoint}${cid}`
         const response = await fetch(url, {
           method: 'GET',
         })
@@ -238,6 +234,36 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
   )
   const [storageContract, setStorageContract] = useState({})
 
+  const setData = useCallback(
+    (key, dag) => {
+      const set = async () => {
+        const { cid } = await ipfsStore.ipfsEndpoints.dag.put(dag)
+        await storageContract.registerData(
+          wrapper.web3.utils.fromAscii(key),
+          cid
+        )
+      }
+
+      set()
+    },
+    [ipfsStore.ipfsEndpoints, storageContract, wrapper]
+  )
+
+  const getData = useCallback(
+    key => {
+      const get = async () => {
+        const cid = await storageContract.getRegisteredData(
+          wrapper.web3.utils.fromAscii(key)
+        )
+        const dag = await ipfsStore.ipfsEndpoints.dag.get(cid)
+        return dag
+      }
+
+      get()
+    },
+    [storageContract, wrapper, ipfsStore.ipfsEndpoints]
+  )
+
   const updateIpfsProvider = useCallback(
     (provider, uri, providerKey, providerSecret) => {
       const update = async () => {
@@ -307,7 +333,9 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
   }, [wrapper, storageApp])
 
   return (
-    <IPFSStorageContext.Provider value={{ ...ipfsStore, updateIpfsProvider }}>
+    <IPFSStorageContext.Provider
+      value={{ ...ipfsStore, updateIpfsProvider, setData, getData }}
+    >
       {children}
     </IPFSStorageContext.Provider>
   )

@@ -315,6 +315,8 @@ export const useIpfs = () => {
     ipfsProviderConnecting,
     error,
     updateIpfsProvider,
+    getData,
+    setData,
   } = useContext(IPFSStorageContext)
 
   return {
@@ -326,5 +328,7 @@ export const useIpfs = () => {
     ipfsProviderConnecting,
     error,
     updateIpfsProvider,
+    getData,
+    setData,
   }
 }
