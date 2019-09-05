@@ -11,12 +11,14 @@ import { AppType, AragonType } from '../prop-types'
 
 export const IPFSStorageContext = createContext({})
 
+const NO_STORAGE_APP_INSTALLED = 'noStorageAppInstalled'
 const IPFS_PROVIDER_CONNECTION_SUCCESS = 'ipfsProviderConnectionSuccess'
 const IPFS_PROVIDER_CONNECTION_FAILURE = 'ipfsProviderConnectionFailure'
 const IPFS_PROVIDER_CONNECTING = 'ipfsProviderConnecting'
 const IPFS_PROVIDER_FOUND = 'ipfsProviderFound'
 
 const initialStorageContextValue = {
+  isStorageAppInstalled: null,
   ipfsEndpoints: null,
   [IPFS_PROVIDER_CONNECTING]: false,
   [IPFS_PROVIDER_CONNECTION_SUCCESS]: false,
@@ -34,7 +36,7 @@ const getFromCache = (wrapper, key) => {
 
 const createIpfsProvider = async (
   provider,
-  uri,
+  uri = '',
   providerKey = '',
   providerSecret = ''
 ) => {
@@ -142,12 +144,11 @@ const getTemporalNode = async (username, password) => {
       })
       return response.json()
     },
-    dagPut: async () => {
-      let key = Math.random().toString()
-      let val = Math.random().toString()
-      let blob = new Blob([{ [key]: val }], {
+    dagPut: async json => {
+      let blob = new Blob([JSON.stringify([json])], {
         type: 'application/json',
       })
+
       let formData = new FormData()
       formData.append('hold_time', '1')
       formData.append('file', blob)
@@ -165,6 +166,11 @@ const getTemporalNode = async (username, password) => {
 
 const reducer = (state, action) => {
   switch (action.type) {
+    case NO_STORAGE_APP_INSTALLED:
+      return {
+        ...initialStorageContextValue,
+        isStorageAppInstalled: false,
+      }
     case IPFS_PROVIDER_CONNECTION_SUCCESS:
       return {
         ...state,
@@ -223,12 +229,17 @@ export const providerFound = (provider, uri) => ({
   },
 })
 
+const noStorageApp = () => ({
+  type: NO_STORAGE_APP_INSTALLED,
+})
+
 export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
   const [ipfsStore, dispatchToIpfsStore] = useReducer(
     reducer,
     initialStorageContextValue
   )
   const [storageContract, setStorageContract] = useState({})
+  const storageApp = apps.find(({ name }) => name === 'Storage')
 
   const updateIpfsProvider = useCallback(
     (provider, uri, providerKey, providerSecret) => {
@@ -260,8 +271,6 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
     },
     [wrapper, storageContract]
   )
-
-  const storageApp = apps.find(({ name }) => name === 'Storage')
 
   useEffect(() => {
     const getStorageProvider = async storageApp => {
@@ -295,6 +304,8 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
     if (storageApp) {
       dispatchToIpfsStore(connecting())
       getStorageProvider(storageApp)
+    } else {
+      dispatchToIpfsStore(noStorageApp())
     }
   }, [wrapper, storageApp])
 
