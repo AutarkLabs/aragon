@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import { Button, DropDown, TextInput, theme } from '@aragon/ui'
 import styled from 'styled-components'
 import { useIpfs } from '../../hooks'
-import { AppType, AragonType } from '../../prop-types'
 
 export const ARAGON_ASSOCIATION = 'ARAGON_ASSOCIATION'
 export const INFURA = 'INFURA'
@@ -58,8 +57,8 @@ ProviderCredentialInputs.propTypes = {
   setProviderSecret: PropTypes.func.isRequired,
 }
 
-const Storage = ({ apps, wrapper }) => {
-  const { ipfsProviderName, updateIpfsProvider } = useIpfs()
+const Storage = () => {
+  const { ipfsProviderName, updateIpfsProvider, getData, setData } = useIpfs()
 
   const [activeProvider, setActiveProvider] = useState(
     items.indexOf(ipfsProviderName)
@@ -120,13 +119,22 @@ const Storage = ({ apps, wrapper }) => {
       >
         Save changes
       </Button>
+      <Button
+        onClick={() => {
+          setData('key', { value: 'yo' })
+        }}
+      >
+        Set data
+      </Button>
+      <Button
+        onClick={() => {
+          getData('key')
+        }}
+      >
+        get data
+      </Button>
     </div>
   )
-}
-
-Storage.propTypes = {
-  apps: PropTypes.arrayOf(AppType),
-  wrapper: AragonType,
 }
 
 const InputsContainer = styled.div`
