@@ -2,7 +2,12 @@ import React, { useCallback, useState } from 'react'
 import PropTypes from 'prop-types'
 import { Box, Header, Layout, Link, GU, Tabs, useLayout } from '@aragon/ui'
 import { appIds, network } from '../../environment'
-import { AppType, DaoAddressType, EthereumAddressType } from '../../prop-types'
+import {
+  AppType,
+  AragonType,
+  DaoAddressType,
+  EthereumAddressType,
+} from '../../prop-types'
 import airdrop, { testTokensEnabled } from '../../testnet/airdrop'
 import { toChecksumAddress } from '../../web3-utils'
 import useAppWidth from '../useAppWidth'
@@ -11,6 +16,7 @@ import Address from './Address'
 import RequestTokens from './RequestTokens'
 import Apps from './Apps'
 import Brand from './Brand'
+import Storage from './Storage'
 import Tokens from './Tokens'
 
 const Organization = React.memo(function Organization({
@@ -24,6 +30,7 @@ const Organization = React.memo(function Organization({
   walletNetwork,
   walletWeb3,
   walletProviderId,
+  wrapper,
 }) {
   const { layoutName } = useLayout()
   const [selectedTab, setSelectedTab] = useState(0)
@@ -137,7 +144,9 @@ const Organization = React.memo(function Organization({
 
       {selectedTab === 2 && (
         <React.Fragment>
-          <Section heading="Configuration" />
+          <Section heading="Configuration">
+            <Storage apps={apps} wrapper={wrapper} />
+          </Section>
           <Section heading="Manual Upload" />
         </React.Fragment>
       )}
@@ -163,6 +172,7 @@ Organization.propTypes = {
   walletNetwork: PropTypes.string.isRequired,
   walletWeb3: PropTypes.object.isRequired,
   walletProviderId: PropTypes.string.isRequired,
+  wrapper: AragonType,
 }
 
 const Section = ({ ...props }) => {

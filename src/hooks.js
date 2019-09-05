@@ -14,6 +14,7 @@ import {
 import keycodes from './keycodes'
 import { log, removeStartingSlash } from './utils'
 import { addressesEqual } from './web3-utils'
+import { IPFSStorageContext } from './contexts/IpfsStorageContext'
 
 // Update `now` at a given interval.
 export function useNow(updateEvery = 1000) {
@@ -311,4 +312,34 @@ export function useLocalIdentity(entity) {
   }, [identityEvents$, handleResolve, entity, handleRemove])
 
   return { name, handleResolve }
+}
+
+export const useIpfs = () => {
+  const {
+    ipfsProviderName,
+    ipfsProviderUri,
+    ipfsEndpoints,
+    ipfsProviderConnectionSuccess,
+    ipfsProviderConnectionFailure,
+    ipfsProviderConnecting,
+    error,
+    updateIpfsProvider,
+    getData,
+    setData,
+    isStorageAppInstalled,
+  } = useContext(IPFSStorageContext)
+
+  return {
+    ipfsProviderName,
+    ipfsProviderUri,
+    ipfsEndpoints,
+    ipfsProviderConnectionSuccess,
+    ipfsProviderConnectionFailure,
+    ipfsProviderConnecting,
+    error,
+    updateIpfsProvider,
+    getData,
+    setData,
+    isStorageAppInstalled,
+  }
 }
