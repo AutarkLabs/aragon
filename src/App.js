@@ -21,6 +21,8 @@ import { log } from './utils'
 import { ActivityProvider } from './contexts/ActivityContext'
 import { FavoriteDaosProvider } from './contexts/FavoriteDaosContext'
 import { PermissionsProvider } from './contexts/PermissionsContext'
+import { IPFSStorageProvider } from './contexts/IpfsStorageContext'
+import { ModalProvider } from './components/ModalManager/ModalManager'
 import { IdentityProvider } from './components/IdentityManager/IdentityManager'
 import { LocalIdentityModalProvider } from './components/LocalIdentityModal/LocalIdentityModalManager'
 import LocalIdentityModal from './components/LocalIdentityModal/LocalIdentityModal'
@@ -411,77 +413,81 @@ class App extends React.Component {
                 transform: scale.interpolate(v => `scale3d(${v}, ${v}, 1)`),
               }}
             >
-              <CustomToast>
-                <IdentityProvider onResolve={this.handleIdentityResolve}>
-                  <LocalIdentityModalProvider
-                    onShowLocalIdentityModal={this.handleOpenLocalIdentityModal}
-                  >
-                    <LocalIdentityModal
-                      address={intentAddress}
-                      label={intentLabel}
-                      opened={identityIntent !== null}
-                      onCancel={this.handleIdentityCancel}
-                      onSave={this.handleIdentitySave}
-                    />
-                    <FavoriteDaosProvider>
-                      <ActivityProvider
-                        daoDomain={daoAddress.domain}
-                        web3={web3}
+              <IPFSStorageProvider apps={apps} wrapper={wrapper}>
+                <CustomToast>
+                  <IdentityProvider onResolve={this.handleIdentityResolve}>
+                    <ModalProvider>
+                      <LocalIdentityModalProvider
+                        onShowLocalIdentityModal={this.handleOpenLocalIdentityModal}
                       >
-                        <PermissionsProvider
-                          wrapper={wrapper}
-                          apps={appsWithIdentifiers}
-                          permissions={permissions}
-                        >
-                          <div css="position: relative; z-index: 0">
-                            <Wrapper
-                              visible={mode === APP_MODE_ORG}
-                              apps={appsWithIdentifiers}
-                              appsStatus={appsStatus}
-                              canUpgradeOrg={canUpgradeOrg}
-                              connected={connected}
-                              daoAddress={daoAddress}
-                              daoStatus={daoStatus}
-                              historyBack={this.historyBack}
-                              historyPush={this.historyPush}
-                              locator={locator}
-                              onRequestAppsReload={this.handleRequestAppsReload}
-                              openPreferences={this.openPreferences}
-                              permissionsLoading={permissionsLoading}
-                              repos={repos}
-                              signatureBag={signatureBag}
-                              transactionBag={transactionBag}
-                              web3={web3}
+                        <LocalIdentityModal
+                          address={intentAddress}
+                          label={intentLabel}
+                          opened={identityIntent !== null}
+                          onCancel={this.handleIdentityCancel}
+                          onSave={this.handleIdentitySave}
+                        />
+                        <FavoriteDaosProvider>
+                          <ActivityProvider
+                            daoDomain={daoAddress.domain}
+                            web3={web3}
+                          >
+                            <PermissionsProvider
                               wrapper={wrapper}
+                              apps={appsWithIdentifiers}
+                              permissions={permissions}
+                            >
+                              <div css="position: relative; z-index: 0">
+                                <Wrapper
+                                  visible={mode === APP_MODE_ORG}
+                                  apps={appsWithIdentifiers}
+                                  appsStatus={appsStatus}
+                                  canUpgradeOrg={canUpgradeOrg}
+                                  connected={connected}
+                                  daoAddress={daoAddress}
+                                  daoStatus={daoStatus}
+                                  historyBack={this.historyBack}
+                                  historyPush={this.historyPush}
+                                  locator={locator}
+                                  onRequestAppsReload={this.handleRequestAppsReload}
+                                  openPreferences={this.openPreferences}
+                                  permissionsLoading={permissionsLoading}
+                                  repos={repos}
+                                  signatureBag={signatureBag}
+                                  transactionBag={transactionBag}
+                                  web3={web3}
+                                  wrapper={wrapper}
+                                />
+                              </div>
+                            </PermissionsProvider>
+
+                            <Onboarding
+                              selectorNetworks={selectorNetworks}
+                              status={
+                                mode === APP_MODE_START || mode === APP_MODE_SETUP
+                                  ? locator.action || 'welcome'
+                                  : 'none'
+                              }
+                              web3={web3}
                             />
-                          </div>
-                        </PermissionsProvider>
 
-                        <Onboarding
-                          selectorNetworks={selectorNetworks}
-                          status={
-                            mode === APP_MODE_START || mode === APP_MODE_SETUP
-                              ? locator.action || 'welcome'
-                              : 'none'
-                          }
-                          web3={web3}
-                        />
+                            <GlobalPreferences
+                              locator={locator}
+                              wrapper={wrapper}
+                              apps={appsWithIdentifiers}
+                              onScreenChange={this.openPreferences}
+                              onClose={this.closePreferences}
+                              historyPush={this.historyPush}
+                            />
 
-                        <GlobalPreferences
-                          locator={locator}
-                          wrapper={wrapper}
-                          apps={appsWithIdentifiers}
-                          onScreenChange={this.openPreferences}
-                          onClose={this.closePreferences}
-                          historyPush={this.historyPush}
-                        />
-
-                        <HelpScoutBeacon locator={locator} apps={apps} />
-                      </ActivityProvider>
-                    </FavoriteDaosProvider>
-                  </LocalIdentityModalProvider>
-                </IdentityProvider>
-              </CustomToast>
+                            <HelpScoutBeacon locator={locator} apps={apps} />
+                          </ActivityProvider>
+                        </FavoriteDaosProvider>
+                      </LocalIdentityModalProvider>
+                    </ModalProvider>
+                  </IdentityProvider>
+                </CustomToast>
+              </IPFSStorageProvider>
             </animated.div>
           </animated.div>
         )}
