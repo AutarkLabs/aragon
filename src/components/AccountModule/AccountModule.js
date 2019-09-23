@@ -19,6 +19,8 @@ import { useWallet } from '../../wallet'
 import NotConnected from './NotConnected'
 import ConnectionInfo from './ConnectionInfo'
 import { useNetworkConnectionData } from './utils'
+import { useAccount } from '../../account'
+import { getAppPath } from '../../routing'
 
 // Metamask seems to take about ~200ms to send the connected accounts.
 // This is to avoid a flash with the connection button.
@@ -26,7 +28,7 @@ const ACCOUNT_MODULE_DISPLAY_DELAY = 500
 
 const AnimatedDiv = animated.div
 
-function AccountModule({ compact }) {
+function AccountModule({ compact, locator }) {
   const { isConnected } = useWallet()
   const [display, setDisplay] = useState(false)
 
@@ -61,7 +63,7 @@ function AccountModule({ compact }) {
             align-items: center;
           `}
         >
-          {isConnected ? <ConnectedMode /> : <NotConnected compact={compact} />}
+          {isConnected ? <ConnectedMode locator={locator} /> : <NotConnected compact={compact} />}
         </AnimatedDiv>
       )}
     </Spring>
@@ -69,10 +71,12 @@ function AccountModule({ compact }) {
 }
 
 AccountModule.propTypes = {
-  compact: PropTypes.bool,
+  compact: PropTypes.bool.isRequired,
+  locator: PropTypes.object.isRequired,
 }
 
-function ConnectedMode() {
+function ConnectedMode({ locator }) {
+  const { address, label, networkId } = useAccount()
   const theme = useTheme()
   const [opened, setOpened] = useState(false)
   const wallet = useWallet()
@@ -86,13 +90,22 @@ function ConnectedMode() {
   const { walletNetworkName, hasNetworkMismatch } = useNetworkConnectionData()
 
   return (
-    <div
+    <a
       ref={containerRef}
       css={`
         display: flex;
         height: 100%;
         ${unselectable};
+        text-decoration: none;
+        color: inherit
+        cursor: pointer;
+        &:hover {
+          background: ${theme.surfacePressed};
+        }
       `}
+      href={`${window.location.origin}#${getAppPath(
+        locator
+      )}/profile/${address}`}
     >
       <ButtonBase
         onClick={toggle}
@@ -189,8 +202,12 @@ function ConnectedMode() {
       >
         <ConnectionInfo address={wallet.account} />
       </Popover>
-    </div>
+    </a>
   )
+}
+
+ConnectedMode.propTypes = {
+  locator: PropTypes.object.isRequired,
 }
 
 export default AccountModule
