@@ -103,9 +103,13 @@ function ConnectedMode({ locator }) {
           background: ${theme.surfacePressed};
         }
       `}
-      href={`${window.location.origin}#${getAppPath(
-        locator
-      )}/profile/${address}`}
+      href={
+        locator.instanceId.toLowerCase() === 'profile'
+          ? `${window.location.origin}#${getAppPath(locator)}/${address}`
+          : `${window.location.origin}#${getAppPath(
+              locator
+            )}/profile/${address}`
+      }
     >
       <ButtonBase
         onClick={toggle}
