@@ -4,12 +4,14 @@ import { Info, GU, textStyle, useTheme } from '@aragon/ui'
 import SignerButton from './SignerButton'
 import ToggleContent from './ToggleContent'
 import LocalIdentityBadge from '../IdentityBadge/LocalIdentityBadge'
-import AppInstanceLabel from '../AppInstanceLabel'
+import AppInstanceLabel, { ProfileInstanceLabel } from '../AppInstanceLabel'
 import { AppType, EthereumAddressType } from '../../prop-types'
 import { isHumanReadable } from '../../utils'
 
 const SignMsgContent = ({ apps, account, intent, onSign, signingEnabled }) => {
   const { message, requestingApp: requestingAppAddress } = intent
+  const signRequestedByProfileApp =
+    intent.requestingApp === '3Box-Aragon Profile'
 
   const requestingApp = useMemo(
     () =>
@@ -34,11 +36,15 @@ const SignMsgContent = ({ apps, account, intent, onSign, signingEnabled }) => {
           margin-bottom: ${3 * GU}px;
         `}
       >
-        <AppInstanceLabel
-          app={requestingApp}
-          proxyAddress={requestingAppAddress}
-          showIcon
-        />
+        {signRequestedByProfileApp ? (
+          <ProfileInstanceLabel />
+        ) : (
+          <AppInstanceLabel
+            app={requestingApp}
+            proxyAddress={requestingAppAddress}
+            showIcon
+          />
+        )}
       </div>
       {humanReadableMessage ? (
         <React.Fragment>
