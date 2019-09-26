@@ -9,7 +9,6 @@ import AppIcon from './AppIcon/AppIcon'
 export const ProfileInstanceLabel = () => {
   return (
     <Main>
-      <AppName>Aragon Profile</AppName>
       <Tag
         mode="identifier"
         label="Aragon Profile"
