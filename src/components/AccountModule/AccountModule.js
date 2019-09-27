@@ -20,7 +20,6 @@ import NotConnected from './NotConnected'
 import ConnectionInfo from './ConnectionInfo'
 import { useNetworkConnectionData } from './utils'
 import { useAccount } from '../../account'
-import { getAppPath } from '../../routing'
 
 // Metamask seems to take about ~200ms to send the connected accounts.
 // This is to avoid a flash with the connection button.
@@ -103,13 +102,10 @@ function ConnectedMode({ locator }) {
           background: ${theme.surfacePressed};
         }
       `}
-      href={
-        locator.instanceId.toLowerCase() === 'profile'
-          ? `${window.location.origin}#${getAppPath(locator)}/${address}`
-          : `${window.location.origin}#${getAppPath(
-              locator
-            )}/profile/${address}`
-      }
+      href={`${window.location.origin}#/${locator.dao.substr(
+        0,
+        locator.dao.indexOf('.')
+      )}/profile/${address}`}
     >
       <ButtonBase
         onClick={toggle}
