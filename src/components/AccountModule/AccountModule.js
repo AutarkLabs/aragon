@@ -102,10 +102,7 @@ function ConnectedMode({ locator }) {
           background: ${theme.surfacePressed};
         }
       `}
-      href={`${window.location.origin}#/${locator.dao.substr(
-        0,
-        locator.dao.indexOf('.')
-      )}/profile/${address}`}
+      href={`${window.location.origin}#/${locator.dao}/profile/${address}`}
     >
       <ButtonBase
         onClick={toggle}
