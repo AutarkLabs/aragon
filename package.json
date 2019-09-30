@@ -28,7 +28,7 @@
     "@aragon/ui": "^1.2.1",
     "@aragon/wrapper": "^5.0.0-rc.23",
     "@babel/polyfill": "^7.0.0",
-    "@openworklabs/aragon-profile": "0.1.18",
+    "@openworklabs/aragon-profile": "0.1.19",
     "@sentry/browser": "^5.5.0",
     "@ungap/event-target": "^0.1.0",
     "clipboard-polyfill": "^2.8.6",
