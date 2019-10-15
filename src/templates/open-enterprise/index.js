@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import React from 'react'
 import BN from 'bn.js'
 import {
@@ -28,16 +27,16 @@ export default {
   `,
   userGuideUrl: 'https://autark.gitbook.io/open-enterprise/',
   sourceCodeUrl: 'https://github.com/AutarkLabs/open-enterprise',
-  registry: 'hatch.aragonpm.eth',
+  registry: 'aragonpm.eth',
   apps: [
     { appName: 'voting.aragonpm.eth', label: 'Voting' },
     { appName: 'token-manager.aragonpm.eth', label: 'Tokens' },
     { appName: 'finance.aragonpm.eth', label: 'Finance' },
-    { appName: 'address-book.hatch.aragonpm.eth', label: 'Address Book' },
-    { appName: 'allocations.hatch.aragonpm.eth', label: 'Allocations' },
-    { appName: 'dot-voting.hatch.aragonpm.eth', label: 'Dot Voting' },
-    { appName: 'projects.hatch.aragonpm.eth', label: 'Projects' },
-    { appName: 'rewards.hatch.aragonpm.eth', label: 'Rewards' },
+    { appName: 'address-book.aragonpm.eth', label: 'Address Book' },
+    { appName: 'allocations.aragonpm.eth', label: 'Allocations' },
+    { appName: 'dot-voting.aragonpm.eth', label: 'Dot Voting' },
+    { appName: 'projects.aragonpm.eth', label: 'Projects' },
+    { appName: 'rewards.aragonpm.eth', label: 'Rewards' },
   ],
   screens: [
     [
@@ -71,7 +70,7 @@ export default {
               {
                 label: (
                   <KnownAppBadge
-                    appName="dot-voting.hatch.aragonpm.eth"
+                    appName="dot-voting.aragonpm.eth"
                     label="Dot Voting"
                   />
                 ),
@@ -97,9 +96,12 @@ export default {
     const financePeriod = 0 // default
 
     const { domain, dotVoting, tokens, voting } = data
-    const useDiscussions = dotVoting.discussions
-
     const { tokenName, tokenSymbol, members } = tokens
+
+    const baseStake = new BN(10).pow(new BN(18))
+    const stakes = members.map(([_, stake]) =>
+      baseStake.mul(new BN(stake.toString())).toString()
+    )
     const accounts = members.map(([account]) => account)
 
     const { support, quorum, duration } = voting
@@ -109,7 +111,11 @@ export default {
     const adjustedDuration = new BN(duration).toString()
     const votingSettings = [adjustedSupport, adjustedQuorum, adjustedDuration]
 
-    const { dvSupport, dvQuorum, dvDuration } = dotVoting
+    const {
+      support: dvSupport,
+      quorum: dvQuorum,
+      duration: dvDuration,
+    } = dotVoting
     const adjustedDvSupport = onePercent.mul(new BN(dvSupport)).toString()
     const adjustedDvQuorum = onePercent.mul(new BN(dvQuorum)).toString()
     const adjustedDvDuration = new BN(dvDuration).toString()
@@ -120,25 +126,25 @@ export default {
     ]
 
     /* For Open Enterprise, is currently not possible to use a single tx, the creation process cost is ~10M gas */
-
     return [
       {
-        name: 'Create token and base organization',
+        name: 'Create organization',
         transaction: createTx('newTokenAndInstance', [
           tokenName,
           tokenSymbol,
           domain,
           accounts,
+          stakes,
           votingSettings,
           financePeriod,
         ]),
       },
       {
-        name: 'Setup Open Enterprise apps',
+        name: 'Install Open Enterprise',
         transaction: createTx('newOpenEnterprise', [
           dotVotingSettings,
           allocationsPeriod,
-          useDiscussions,
+          false, // useDiscussions option, will revisit when forwarding API gets ready
         ]),
       },
     ]
