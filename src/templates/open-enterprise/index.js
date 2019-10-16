@@ -126,7 +126,6 @@ export default {
     ]
 
     /* For Open Enterprise, is currently not possible to use a single tx, the creation process cost is ~10M gas */
-    console.log('settinga', dotVotingSettings, allocationsPeriod)
 
     return [
       {
