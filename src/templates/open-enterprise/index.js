@@ -1,5 +1,6 @@
 import React from 'react'
 import BN from 'bn.js'
+import { network } from '../../environment'
 import {
   ClaimDomainScreen,
   DotVotingScreen,
