@@ -16,7 +16,7 @@ const DAY_IN_SECONDS = HOUR_IN_SECONDS * 24
 
 const DEFAULT_SUPPORT = 0
 const DEFAULT_QUORUM = 15
-const DEFAULT_DURATION = MINUTE_IN_SECONDS
+const DEFAULT_DURATION = DAY_IN_SECONDS
 
 function validationError(duration) {
   if (duration < 1 * MINUTE_IN_SECONDS) {
@@ -32,8 +32,9 @@ function reduceFields(fields, [field, value]) {
   if (field === 'quorum') {
     return {
       ...fields,
-      quorum: Math.max(1, value), // prevents 0% quorum (not supported in contract)
       support: Math.min(fields.support, value),
+      // 0% quorum is not possible, but this is handled in each template
+      quorum: value,
     }
   }
   if (field === 'support') {
@@ -169,10 +170,11 @@ function DotVotingScreen({
           <React.Fragment>
             Support %
             <Help hint="What’s the support?">
-              <strong>Support</strong> is the minimum percentage of votes
-              required on a dot voting option for it to be considered valid. For
-              example, if "Support %" is set to 5%, then an option needs at
-              least 5% of the total dot votes to be considered valid.
+              <strong>Support</strong> is the relative percentage of votes that
+              are required to support a dot voting option for the option to be
+              considered valid. For example, if "Support %" is set to 5%, then
+              an option needs at least 5% of the total dot votes to be
+              considered valid.
             </Help>
           </React.Fragment>
         }
