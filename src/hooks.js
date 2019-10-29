@@ -334,9 +334,6 @@ export function usePrefersDarkMode() {
 
 export const useOrganizationDataStore = () => {
   const {
-    ipfsProviderName,
-    ipfsProviderUri,
-    ipfsProviderPort,
     ipfsEndpoints,
     ipfsProviderConnectionSuccess,
     ipfsProviderConnectionFailure,
@@ -348,9 +345,6 @@ export const useOrganizationDataStore = () => {
   } = useContext(IPFSStorageContext)
 
   return {
-    ipfsProviderName,
-    ipfsProviderUri,
-    ipfsProviderPort,
     ipfsEndpoints,
     ipfsProviderConnectionSuccess,
     ipfsProviderConnectionFailure,
