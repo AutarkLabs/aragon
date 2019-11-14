@@ -6,16 +6,19 @@ import React, {
   useState,
 } from 'react'
 import PropTypes from 'prop-types'
-import {
-  createIpfsProvider,
-  ensureServerIsListeningToStorageContract,
-  instantiateStorageContract,
-  optmisticallyPinDag,
-} from '../storage'
+import { instantiateStorageContract, Quasar } from '../storage'
 import { AppType, AragonType } from '../prop-types'
 import { appIds } from '../environment'
+import { getEthNetworkType } from '../local-settings'
 
 export const IPFSStorageContext = createContext({})
+
+const networkType = getEthNetworkType()
+// second argument ignores quasar when we're developing locally
+const quasarApi = new Quasar(
+  'http://localhost:3001/api/v0',
+  networkType === 'local'
+)
 
 const NO_STORAGE_APP_INSTALLED = 'noStorageAppInstalled'
 const IPFS_PROVIDER_CONNECTION_SUCCESS = 'ipfsProviderConnectionSuccess'
@@ -105,7 +108,7 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
         throw new Error('type of value param must be object')
       }
       const set = async () => {
-        const cid = await optmisticallyPinDag(dag)
+        const cid = await ipfsStore.ipfsEndpoints.dag.put(dag)
         await storageContract.registerData(
           wrapper.web3.utils.fromAscii(key),
           cid
@@ -113,7 +116,12 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
       }
       return set()
     },
-    [ipfsStore.isStorageAppInstalled, storageContract, wrapper]
+    [
+      ipfsStore.isStorageAppInstalled,
+      ipfsStore.ipfsEndpoints,
+      storageContract,
+      wrapper,
+    ]
   )
 
   const getData = useCallback(
@@ -157,11 +165,11 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
             storageApp.abi,
             wrapper
           )
-          await ensureServerIsListeningToStorageContract(
-            storageApp.proxyAddress
-          )
+          await quasarApi.listenToStorageContract(storageApp.proxyAddress)
           setStorageContract(storageContract)
-          dispatchToIpfsStore(connectionSuccess(await createIpfsProvider()))
+          dispatchToIpfsStore(
+            connectionSuccess(await quasarApi.createIpfsProvider())
+          )
         }
       } catch (error) {
         dispatchToIpfsStore(connectionFailure(error))

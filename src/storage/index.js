@@ -1,4 +1,4 @@
 export {
   default as instantiateStorageContract,
 } from './instantiateStorageContract'
-export * from './quasarHelpers'
+export { default as Quasar } from './Quasar'
