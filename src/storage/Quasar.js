@@ -10,7 +10,7 @@ class Quasar {
       return Promise.resolve()
     }
     try {
-      const response = await fetch(`${this.quasarEndpoint}/contracts`, {
+      const response = await fetch(`${this.quasarEndpoint}/storageContracts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
