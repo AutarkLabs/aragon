@@ -35,6 +35,7 @@ const APP_CONSOLE = staticApps.get('console').app
 const APP_HOME = staticApps.get('home').app
 const APP_ORGANIZATION = staticApps.get('organization').app
 const APP_PERMISSIONS = staticApps.get('permissions').app
+const APP_PROFILE = staticApps.get('profile').app
 
 const systemAppsOpenedState = {
   key: 'SYSTEM_APPS_OPENED_STATE',
@@ -86,6 +87,7 @@ function MenuPanel({
     APP_PERMISSIONS,
     APP_APPS_CENTER,
     APP_ORGANIZATION,
+    APP_PROFILE,
     ...(showConsole ? [APP_CONSOLE] : []),
   ]
 
