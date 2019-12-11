@@ -9,16 +9,10 @@ import PropTypes from 'prop-types'
 import { instantiateStorageContract, Quasar } from '../storage'
 import { AppType, AragonType } from '../prop-types'
 import { appIds } from '../environment'
-import { getEthNetworkType } from '../local-settings'
 
 export const IPFSStorageContext = createContext({})
 
-const networkType = getEthNetworkType()
-// second argument ignores quasar when we're developing locally
-const quasarApi = new Quasar(
-  'http://localhost:3001/api/v0',
-  networkType === 'local'
-)
+const quasarApi = new Quasar('http://localhost:3003/api/v0')
 
 const NO_STORAGE_APP_INSTALLED = 'noStorageAppInstalled'
 const IPFS_PROVIDER_CONNECTION_SUCCESS = 'ipfsProviderConnectionSuccess'
@@ -99,7 +93,9 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
     initialStorageContextValue
   )
   const [storageContract, setStorageContract] = useState({})
-  const setData = useCallback(
+
+  // dag helpers
+  const setDagInOrgDataStore = useCallback(
     (key, dag) => {
       if (!ipfsStore.isStorageAppInstalled) {
         throw new Error('No storage app installed')
@@ -124,7 +120,7 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
     ]
   )
 
-  const getData = useCallback(
+  const getDagFromOrgDataStore = useCallback(
     key => {
       const get = async () => {
         if (!ipfsStore.isStorageAppInstalled) {
@@ -135,6 +131,46 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
         )
         if (!cid) return null
         return ipfsStore.ipfsEndpoints.dag.get(cid)
+      }
+      return get()
+    },
+    [ipfsStore, storageContract, wrapper]
+  )
+
+  // file helpers
+  const setFileInOrgDataStore = useCallback(
+    (key, file) => {
+      if (!ipfsStore.isStorageAppInstalled) {
+        throw new Error('No storage app installed')
+      }
+      const set = async () => {
+        const cid = await ipfsStore.ipfsEndpoints.add(file)
+        await storageContract.registerData(
+          wrapper.web3.utils.fromAscii(key),
+          cid
+        )
+      }
+      return set()
+    },
+    [
+      ipfsStore.isStorageAppInstalled,
+      ipfsStore.ipfsEndpoints,
+      storageContract,
+      wrapper,
+    ]
+  )
+
+  const getFileFromOrgDataStore = useCallback(
+    key => {
+      const get = async () => {
+        if (!ipfsStore.isStorageAppInstalled) {
+          throw new Error('No storage app installed')
+        }
+        const cid = await storageContract.getRegisteredData(
+          wrapper.web3.utils.fromAscii(key)
+        )
+        if (!cid) return null
+        return ipfsStore.ipfsEndpoints.cat(cid)
       }
       return get()
     },
@@ -191,7 +227,15 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
   ])
 
   return (
-    <IPFSStorageContext.Provider value={{ ...ipfsStore, setData, getData }}>
+    <IPFSStorageContext.Provider
+      value={{
+        ...ipfsStore,
+        setDagInOrgDataStore,
+        getDagFromOrgDataStore,
+        setFileInOrgDataStore,
+        getFileFromOrgDataStore,
+      }}
+    >
       {children}
     </IPFSStorageContext.Provider>
   )
