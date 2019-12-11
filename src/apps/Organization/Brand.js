@@ -12,14 +12,14 @@ const Brand = () => {
   const [image, setImage] = useState()
   const [fetchedData, setFetchedData] = useState(false)
   const {
-    setData,
-    getData,
+    setFileInOrgDataStore,
+    getFileFromOrgDataStore,
     ipfsProviderConnectionSuccess,
   } = useOrganizationDataStore()
 
   useEffect(() => {
     const fetchOrgSettingsLogo = async () => {
-      const data = await getData(ORG_SETTINGS_LOGO)
+      const data = await getFileFromOrgDataStore(ORG_SETTINGS_LOGO)
       console.log(data)
       const file = new File([data], `${ORG_SETTINGS_LOGO}.json`, {
         type: 'text/json;charset=utf-8',
@@ -32,14 +32,12 @@ const Brand = () => {
     if (!fetchedData && ipfsProviderConnectionSuccess) {
       fetchOrgSettingsLogo()
     }
-  }, [fetchedData, getData, ipfsProviderConnectionSuccess])
+  }, [fetchedData, getFileFromOrgDataStore, ipfsProviderConnectionSuccess])
 
   const onDrop = useCallback(
     async acceptedFiles => {
       const file = acceptedFiles[0]
       // create a preview of the image
-      setImage(URL.createObjectURL(file))
-
       const reader = new FileReader()
 
       reader.onabort = () => console.log('file reading was aborted')
@@ -47,15 +45,15 @@ const Brand = () => {
       reader.onload = async () => {
         // Do whatever you want with the file contents
         const arrayBuffer = reader.result
-        const file = new File([arrayBuffer], `${ORG_SETTINGS_LOGO}.json`, {
-          type: 'text/json;charset=utf-8',
-        })
-        setImage(URL.createObjectURL(file))
-        // await setData(ORG_SETTINGS_LOGO, arrayBuffer)
+        // const file = new File([arrayBuffer], `${ORG_SETTINGS_LOGO}.json`, {
+        //   type: 'text/json;charset=utf-8',
+        // })
+        // setImage(URL.createObjectURL(file))
+        await setFileInOrgDataStore(ORG_SETTINGS_LOGO, arrayBuffer)
       }
       reader.readAsArrayBuffer(file)
     },
-    [setData]
+    [setFileInOrgDataStore]
   )
 
   return (

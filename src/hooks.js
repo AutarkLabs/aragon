@@ -339,9 +339,11 @@ export const useOrganizationDataStore = () => {
     ipfsProviderConnectionFailure,
     ipfsProviderConnecting,
     error,
-    getData,
-    setData,
+    getDagFromOrgDataStore,
+    setDagInOrgDataStore,
     isStorageAppInstalled,
+    getFileFromOrgDataStore,
+    setFileInOrgDataStore,
   } = useContext(IPFSStorageContext)
 
   return {
@@ -350,8 +352,10 @@ export const useOrganizationDataStore = () => {
     ipfsProviderConnectionFailure,
     ipfsProviderConnecting,
     error,
-    getData,
-    setData,
+    getDagFromOrgDataStore,
+    setDagInOrgDataStore,
     isStorageAppInstalled,
+    getFileFromOrgDataStore,
+    setFileInOrgDataStore,
   }
 }

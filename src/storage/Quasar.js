@@ -1,3 +1,5 @@
+import axios from 'axios'
+
 class Quasar {
   constructor(quasarEndpoint, ignoreQuasar = false) {
     this.ignoreQuasar = ignoreQuasar
@@ -24,53 +26,57 @@ class Quasar {
   }
 
   createIpfsProvider = async () => {
-    let baseUrl, dagGetUrl, dagPutUrl
-    if (this.ignoreQuasar) {
-      baseUrl = 'http://localhost:5001/api/v0'
-      dagGetUrl = 'dag/get?arg='
-      dagPutUrl = 'dag/put'
-    } else {
-      const response = await fetch(`${this.quasarEndpoint}/ipfs-provider`)
-      const result = await response.json()
-      baseUrl = result.baseUrl
-      dagGetUrl = result.dagGetUrl
-      dagPutUrl = 'dag/put'
-    }
     this.ipfs = {
+      cat: async hash => {
+        try {
+          const response = await axios.get(
+            `${this.quasarEndpoint}/cat?arg=${hash}`
+          )
+          return new Blob([response.data])
+        } catch (err) {
+          console.error('Error fetching file from IPFS', err)
+        }
+      },
+      add: async buffer => {
+        const formData = new FormData()
+        const val = new Blob([buffer])
+        formData.append('entry', val)
+
+        try {
+          const response = await fetch(`${this.quasarEndpoint}/add`, {
+            method: 'POST',
+            body: formData,
+          })
+          if (response.status === 201) return response.text()
+
+          throw new Error(
+            'There was a problem pinning your data. Please wait a few minutes and try again'
+          )
+        } catch (err) {
+          console.error('Error pinning file to IPFS', err)
+        }
+      },
       dag: {
         get: async cid => {
-          const response = await fetch(`${baseUrl}/${dagGetUrl}${cid}`)
+          const response = await fetch(
+            `${this.quasarEndpoint}/dag/get?arg=${cid}`
+          )
           return response.json()
         },
         put: async dag => {
-          if (this.ignoreQuasar) {
-            const data = new FormData()
-            data.append('v0', JSON.stringify(dag))
-            /*
-              Note: you might get CORS errors. Simply enable cors for your dev environment
-              https://github.com/ipfs/js-ipfs-http-client#cors
-            */
-            const response = await fetch(`${baseUrl}/${dagPutUrl}`, {
-              method: 'POST',
-              body: data,
-            })
-            const { Cid } = await response.json()
-            return Cid['/']
-          } else {
-            const response = await fetch(`${this.quasarEndpoint}/dag/put`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(dag),
-            })
+          const response = await fetch(`${this.quasarEndpoint}/dag/put`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(dag),
+          })
 
-            if (response.status === 201) return response.text()
+          if (response.status === 201) return response.text()
 
-            throw new Error(
-              'There was a problem pinning your data. Please wait a few minutes and try again'
-            )
-          }
+          throw new Error(
+            'There was a problem pinning your data. Please wait a few minutes and try again'
+          )
         },
       },
     }
