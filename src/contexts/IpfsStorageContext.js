@@ -133,6 +133,7 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
         const cid = await storageContract.getRegisteredData(
           wrapper.web3.utils.fromAscii(key)
         )
+        if (!cid) return null
         return ipfsStore.ipfsEndpoints.dag.get(cid)
       }
       return get()
@@ -175,8 +176,19 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
         dispatchToIpfsStore(connectionFailure(error))
       }
     }
-    getStorageProvider()
-  }, [wrapper, apps])
+    // ensure we don't continuously fetch the provider if the hook is used in multiple components
+    if (
+      !ipfsStore.ipfsProviderConnectionSuccess &&
+      !ipfsStore.ipfsProviderConnecting
+    ) {
+      getStorageProvider()
+    }
+  }, [
+    wrapper,
+    apps,
+    ipfsStore.ipfsProviderConnectionSuccess,
+    ipfsStore.ipfsProviderConnecting,
+  ])
 
   return (
     <IPFSStorageContext.Provider value={{ ...ipfsStore, setData, getData }}>
