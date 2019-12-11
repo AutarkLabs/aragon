@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import PropTypes from 'prop-types'
 import {
   Box,
@@ -12,6 +12,7 @@ import {
   unselectable,
   useLayout,
   useTheme,
+  Tabs,
 } from '@aragon/ui'
 import LocalIdentityBadge from '../../components/IdentityBadge/LocalIdentityBadge'
 import { appIds, network } from '../../environment'
@@ -21,6 +22,8 @@ import { getProviderString } from '../../ethereum-providers'
 import airdrop, { testTokensEnabled } from '../../testnet/airdrop'
 import { toChecksumAddress } from '../../web3-utils'
 import { useWallet } from '../../wallet'
+import BasicInfo from './BasicInfo'
+import Brand from './Brand'
 
 const Organization = React.memo(function Organization({
   apps,
@@ -33,6 +36,7 @@ const Organization = React.memo(function Organization({
   const theme = useTheme()
   const { layoutName } = useLayout()
   const wallet = useWallet()
+  const [selectedTab, setSelectedTab] = useState(0)
 
   const handleDepositTestTokens = useCallback(() => {
     const finance = apps.find(app => app.appId === appIds.Finance)
@@ -104,148 +108,169 @@ const Organization = React.memo(function Organization({
   return (
     <React.Fragment>
       <Header primary="Organization Settings" />
-      <Box heading="Organization address">
-        <p
-          css={`
-            ${textStyle('body2')}
-          `}
-        >
-          {organizationText}
-        </p>
-        {checksummedDaoAddr && (
-          <React.Fragment>
-            <div
+      <Tabs
+        items={['General', 'Profile']}
+        selected={selectedTab}
+        onChange={setSelectedTab}
+      />
+      {selectedTab === 0 && (
+        <React.Fragment>
+          <Box heading="Organization address">
+            <p
               css={`
-                margin-top: ${2 * GU}px;
-                margin-bottom: ${3 * GU}px;
+                ${textStyle('body2')}
               `}
             >
-              <LocalIdentityBadge
-                entity={checksummedDaoAddr}
-                shorten={shortAddresses}
-              />
-            </div>
-            <Info>
-              <strong css="font-weight: 800">
-                Do not send ETH or ERC20 tokens to this address.
-              </strong>{' '}
-              {depositFundsHelpText}
-            </Info>
-          </React.Fragment>
-        )}
-      </Box>
-      {hasFinanceApp && testTokensEnabled(network.type) && (
-        <Box heading="Request test tokens">
-          <p
-            css={`
-              margin-bottom: ${2 * GU}px;
-              ${textStyle('body2')}
-            `}
-          >
-            Deposit some tokens into your organization for testing purposes.
-          </p>
-          <Button
-            label="Request test tokens"
-            icon={<IconCoin />}
-            display="all"
-            onClick={handleDepositTestTokens}
-            disabled={!enableTransactions}
-            css={`
-              margin-bottom: ${2 * GU}px;
-            `}
-          />
-          {enableTransactions ? (
-            <Info>
-              <p>
-                Requesting tokens will assign random{' '}
-                <strong css="font-weight: 800">test tokens</strong> to your
-                organization. These tokens are named after existing projects,
-                but keep in mind{' '}
-                <strong css="font-weight: 800">they are not real tokens</strong>
-                .
-              </p>
-              <p
-                css={`
-                  margin-top: ${1 * GU}px;
-                `}
-              >
-                You can view the received tokens in{' '}
-                <OpenAppButton onClick={handleOpenFinanceApp}>
-                  Finance
-                </OpenAppButton>
-                .
-              </p>
-            </Info>
-          ) : (
-            <Info mode="warning">
-              {`Please ${
-                wallet.networkType !== network.type
-                  ? `select the ${sanitizeNetworkType(network.type)} network`
-                  : 'unlock your account'
-              } in ${getProviderString(
-                'your Ethereum provider',
-                wallet.providerInfo.id
-              )}.`}
-            </Info>
-          )}
-        </Box>
-      )}
-      {appsLoading ? (
-        <Box heading="Installed Aragon apps">
-          <div
-            css={`
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              height: ${22 * GU}px;
-              ${textStyle('body2')}
-            `}
-          >
-            Loading apps…
-          </div>
-        </Box>
-      ) : (
-        <Box heading="Installed Aragon apps">
-          <ul
-            css={`
-              list-style: none;
-              display: grid;
-              grid-template-columns: minmax(50%, 1fr) minmax(50%, 1fr);
-              grid-column-gap: ${2 * GU}px;
-              margin-bottom: -${3 * GU}px;
-            `}
-          >
-            {apmApps.map(({ appId, description, name, proxyAddress, tags }) => (
-              <li
-                key={proxyAddress}
-                css={`
-                  margin-bottom: ${3 * GU}px;
-                `}
-              >
-                <label
-                  css={`
-                    color: ${theme.surfaceContentSecondary};
-                    ${unselectable()};
-                    ${textStyle('label2')};
-                  `}
-                >
-                  {name}
-                  {tags.length > 0 ? ` (${tags.join(', ')})` : ''}
-                </label>
+              {organizationText}
+            </p>
+            {checksummedDaoAddr && (
+              <React.Fragment>
                 <div
                   css={`
-                    margin-top: ${1 * GU}px;
+                    margin-top: ${2 * GU}px;
+                    margin-bottom: ${3 * GU}px;
                   `}
                 >
                   <LocalIdentityBadge
-                    entity={proxyAddress}
+                    entity={checksummedDaoAddr}
                     shorten={shortAddresses}
                   />
                 </div>
-              </li>
-            ))}
-          </ul>
-        </Box>
+                <Info>
+                  <strong css="font-weight: 800">
+                    Do not send ETH or ERC20 tokens to this address.
+                  </strong>{' '}
+                  {depositFundsHelpText}
+                </Info>
+              </React.Fragment>
+            )}
+          </Box>
+          {hasFinanceApp && testTokensEnabled(network.type) && (
+            <Box heading="Request test tokens">
+              <p
+                css={`
+                  margin-bottom: ${2 * GU}px;
+                  ${textStyle('body2')}
+                `}
+              >
+                Deposit some tokens into your organization for testing purposes.
+              </p>
+              <Button
+                label="Request test tokens"
+                icon={<IconCoin />}
+                display="all"
+                onClick={handleDepositTestTokens}
+                disabled={!enableTransactions}
+                css={`
+                  margin-bottom: ${2 * GU}px;
+                `}
+              />
+              {enableTransactions ? (
+                <Info>
+                  <p>
+                    Requesting tokens will assign random{' '}
+                    <strong css="font-weight: 800">test tokens</strong> to your
+                    organization. These tokens are named after existing
+                    projects, but keep in mind{' '}
+                    <strong css="font-weight: 800">
+                      they are not real tokens
+                    </strong>
+                    .
+                  </p>
+                  <p
+                    css={`
+                      margin-top: ${1 * GU}px;
+                    `}
+                  >
+                    You can view the received tokens in{' '}
+                    <OpenAppButton onClick={handleOpenFinanceApp}>
+                      Finance
+                    </OpenAppButton>
+                    .
+                  </p>
+                </Info>
+              ) : (
+                <Info mode="warning">
+                  {`Please ${
+                    walletNetwork !== network.type
+                      ? `select the ${sanitizeNetworkType(
+                          network.type
+                        )} network`
+                      : 'unlock your account'
+                  } in ${getProviderString(
+                    'your Ethereum provider',
+                    walletProviderId
+                  )}.`}
+                </Info>
+              )}
+            </Box>
+          )}
+          {appsLoading ? (
+            <Box heading="Installed Aragon apps">
+              <div
+                css={`
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  height: ${22 * GU}px;
+                  ${textStyle('body2')}
+                `}
+              >
+                Loading apps…
+              </div>
+            </Box>
+          ) : (
+            <Box heading="Installed Aragon apps">
+              <ul
+                css={`
+                  list-style: none;
+                  display: grid;
+                  grid-template-columns: minmax(50%, 1fr) minmax(50%, 1fr);
+                  grid-column-gap: ${2 * GU}px;
+                  margin-bottom: -${3 * GU}px;
+                `}
+              >
+                {apmApps.map(
+                  ({ appId, description, name, proxyAddress, tags }) => (
+                    <li
+                      key={proxyAddress}
+                      css={`
+                        margin-bottom: ${3 * GU}px;
+                      `}
+                    >
+                      <label
+                        css={`
+                          color: ${theme.surfaceContentSecondary};
+                          ${unselectable()};
+                          ${textStyle('label2')};
+                        `}
+                      >
+                        {name}
+                        {tags.length > 0 ? ` (${tags.join(', ')})` : ''}
+                      </label>
+                      <div
+                        css={`
+                          margin-top: ${1 * GU}px;
+                        `}
+                      >
+                        <LocalIdentityBadge
+                          entity={proxyAddress}
+                          shorten={shortAddresses}
+                        />
+                      </div>
+                    </li>
+                  )
+                )}
+              </ul>
+            </Box>
+          )}
+        </React.Fragment>
+      )}
+      {selectedTab === 1 && (
+        <React.Fragment>
+          <BasicInfo />
+          <Brand />
+        </React.Fragment>
       )}
     </React.Fragment>
   )
