@@ -1,5 +1,3 @@
-import axios from 'axios'
-
 class Quasar {
   constructor(quasarEndpoint, ignoreQuasar = false) {
     this.ignoreQuasar = ignoreQuasar
@@ -29,18 +27,15 @@ class Quasar {
     this.ipfs = {
       cat: async hash => {
         try {
-          const response = await axios.get(
-            `${this.quasarEndpoint}/cat?arg=${hash}`
-          )
-          return new Blob([response.data])
+          const result = await fetch(`${this.quasarEndpoint}/cat?arg=${hash}`)
+          return result
         } catch (err) {
           console.error('Error fetching file from IPFS', err)
         }
       },
-      add: async buffer => {
+      add: async file => {
         const formData = new FormData()
-        const val = new Blob([buffer])
-        formData.append('entry', val)
+        formData.append('entry', file)
 
         try {
           const response = await fetch(`${this.quasarEndpoint}/add`, {

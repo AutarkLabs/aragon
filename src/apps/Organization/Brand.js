@@ -19,13 +19,9 @@ const Brand = () => {
 
   useEffect(() => {
     const fetchOrgSettingsLogo = async () => {
-      const data = await getFileFromOrgDataStore(ORG_SETTINGS_LOGO)
-      console.log(data)
-      const file = new File([data], `${ORG_SETTINGS_LOGO}.json`, {
-        type: 'text/json;charset=utf-8',
-      })
-      console.log(file)
-      if (data) setImage(URL.createObjectURL(file))
+      const result = await getFileFromOrgDataStore(ORG_SETTINGS_LOGO)
+      const arrayBuffer = await result.arrayBuffer()
+      setImage(URL.createObjectURL(new Blob([arrayBuffer])))
       setFetchedData(true)
     }
 
@@ -37,21 +33,8 @@ const Brand = () => {
   const onDrop = useCallback(
     async acceptedFiles => {
       const file = acceptedFiles[0]
-      // create a preview of the image
-      const reader = new FileReader()
-
-      reader.onabort = () => console.log('file reading was aborted')
-      reader.onerror = () => console.log('file reading has failed')
-      reader.onload = async () => {
-        // Do whatever you want with the file contents
-        const arrayBuffer = reader.result
-        // const file = new File([arrayBuffer], `${ORG_SETTINGS_LOGO}.json`, {
-        //   type: 'text/json;charset=utf-8',
-        // })
-        // setImage(URL.createObjectURL(file))
-        await setFileInOrgDataStore(ORG_SETTINGS_LOGO, arrayBuffer)
-      }
-      reader.readAsArrayBuffer(file)
+      setImage(URL.createObjectURL(file))
+      await setFileInOrgDataStore(ORG_SETTINGS_LOGO, file)
     },
     [setFileInOrgDataStore]
   )
@@ -60,7 +43,7 @@ const Brand = () => {
     <Box padding={3 * GU} heading="Brand">
       <div css="display: flex; flex-direction: column; width: 50%; padding-right: 12px">
         <Label text="Logo" />
-        <div css="margin-bottom: 20px">
+        <div css="margin-bottom: 20px; width: 217px;">
           <Dropzone onDrop={onDrop}>
             {({ getRootProps, getInputProps, isDragActive }) => (
               <div {...getRootProps()} css="outline: none">
