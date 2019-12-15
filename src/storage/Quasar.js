@@ -1,14 +1,10 @@
 class Quasar {
   constructor(quasarEndpoint, ignoreQuasar = false) {
-    this.ignoreQuasar = ignoreQuasar
     this.quasarEndpoint = quasarEndpoint
     this.ipfs = null
   }
 
   listenToStorageContract = async contractAddress => {
-    if (this.ignoreQuasar) {
-      return Promise.resolve()
-    }
     try {
       const response = await fetch(`${this.quasarEndpoint}/storageContracts`, {
         method: 'POST',
@@ -56,7 +52,8 @@ class Quasar {
           const response = await fetch(
             `${this.quasarEndpoint}/dag/get?arg=${cid}`
           )
-          return response.json()
+          const res = await response.json()
+          return res.value
         },
         put: async dag => {
           const response = await fetch(`${this.quasarEndpoint}/dag/put`, {
