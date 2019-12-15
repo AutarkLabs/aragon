@@ -20,8 +20,10 @@ const Brand = () => {
   useEffect(() => {
     const fetchOrgSettingsLogo = async () => {
       const result = await getFileFromOrgDataStore(ORG_SETTINGS_LOGO)
-      const arrayBuffer = await result.arrayBuffer()
-      setImage(URL.createObjectURL(new Blob([arrayBuffer])))
+      if (result) {
+        const arrayBuffer = await result.arrayBuffer()
+        setImage(URL.createObjectURL(new Blob([arrayBuffer])))
+      }
       setFetchedData(true)
     }
 
