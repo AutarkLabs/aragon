@@ -12,7 +12,7 @@ import { appIds } from '../environment'
 
 export const IPFSStorageContext = createContext({})
 
-const quasarApi = new Quasar('http://localhost:3003/api/v0')
+const quasarApi = new Quasar('http://quasar.autark.xyz:3001/api/v0')
 
 const NO_STORAGE_APP_INSTALLED = 'noStorageAppInstalled'
 const IPFS_PROVIDER_CONNECTION_SUCCESS = 'ipfsProviderConnectionSuccess'
