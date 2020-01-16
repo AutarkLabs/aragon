@@ -7,6 +7,7 @@ const ORG_SETTINGS_BASIC_INFO = 'ORG_SETTINGS_BASIC_INFO'
 
 const BasicInfo = () => {
   const {
+    orgInfo,
     setDagInOrgDataStore,
     getDagFromOrgDataStore,
     ipfsProviderConnectionSuccess,
@@ -16,19 +17,16 @@ const BasicInfo = () => {
     website: '',
     description: '',
   })
-  const [fetchedData, setFetchedData] = useState(false)
 
   useEffect(() => {
-    const fetchOrgSettingsBasicInfo = async () => {
-      const data = await getDagFromOrgDataStore(ORG_SETTINGS_BASIC_INFO)
-      if (data) setBasicInfo(data)
-      setFetchedData(true)
+    if (orgInfo) {
+      setBasicInfo({
+        name: orgInfo.name,
+        website: orgInfo.website,
+        description: orgInfo.description,
+      })
     }
-
-    if (!fetchedData && ipfsProviderConnectionSuccess) {
-      fetchOrgSettingsBasicInfo()
-    }
-  }, [fetchedData, getDagFromOrgDataStore, ipfsProviderConnectionSuccess])
+  }, [orgInfo])
 
   const changeBasicInfo = ({ target: { name, value } }) => {
     const newBasicInfo = { ...basicInfo }
