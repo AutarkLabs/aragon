@@ -5,53 +5,71 @@ import organizationLogoPlaceholder from '../../assets/organization-logo-placehol
 import Label from './Label'
 import { useOrganizationDataStore } from '../../hooks'
 
-const ORG_SETTINGS_LOGO = 'ORG_SETTINGS_LOGO'
+const ORG_SETTINGS_BRAND = 'ORG_SETTINGS_BRAND'
 
 const Brand = () => {
   const theme = useTheme()
   const [image, setImage] = useState()
+  const [file, setFile] = useState()
   const [background, setBackground] = useState(true)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [accentStyle, setAccentStyle] = useState(0)
-  const [fetchedData, setFetchedData] = useState(false)
   const [accentColor, setAccentColor] = useState('')
   const [accentColor2, setAccentColor2] = useState('')
   const changeAccentColor = e => setAccentColor(e.target.value)
   const changeAccentColor2 = e => setAccentColor2(e.target.value)
-  const saveColors = () => {
-    console.log('save accent color:', accentColor)
-  }
+
   const colorRX = /^#(([a-f0-9]{3}){1,2})$/i
   const colorError = accentColor && !colorRX.test(accentColor)
   const {
-    setFileInOrgDataStore,
-    getFileFromOrgDataStore,
+    orgInfo,
+    ipfsEndpoints,
+    setDagInOrgDataStore,
+    getDagFromOrgDataStore,
     ipfsProviderConnectionSuccess,
+    isStorageAppInstalled,
   } = useOrganizationDataStore()
 
   useEffect(() => {
-    const fetchOrgSettingsLogo = async () => {
-      const result = await getFileFromOrgDataStore(ORG_SETTINGS_LOGO)
-      if (result) {
-        const arrayBuffer = await result.arrayBuffer()
-        setImage(URL.createObjectURL(new Blob([arrayBuffer])))
+    const setBrand = async () => {
+      setBackground(orgInfo.background)
+      setAccentColor(orgInfo.accentColor)
+      if (orgInfo.accentColor2) {
+        setAccentStyle(1)
+        setAccentColor2(orgInfo.accentColor2)
       }
-      setFetchedData(true)
+      const imageBlob = await fetch(orgInfo.image).then(r => r.blob());
+      setImage(imageBlob)
     }
 
-    if (!fetchedData && ipfsProviderConnectionSuccess) {
-      fetchOrgSettingsLogo()
-    }
-  }, [fetchedData, getFileFromOrgDataStore, ipfsProviderConnectionSuccess])
+    if (orgInfo) setBrand()
+  }, [orgInfo])
 
   const onDrop = useCallback(
     async acceptedFiles => {
       const file = acceptedFiles[0]
-      setImage(URL.createObjectURL(file))
-      await setFileInOrgDataStore(ORG_SETTINGS_LOGO, file)
-    },
-    [setFileInOrgDataStore]
+      setImage(file)
+    }, []
   )
+
+  const saveBrand = async () => {
+    if (!isStorageAppInstalled) {
+      throw new Error('No storage app installed')
+    }
+    const style = {
+      background: background,
+      accentColor: accentColor,
+      accentColor2: accentColor2
+    }
+    const styleCID = await ipfsEndpoints.dag.put(style)
+    const logoCID = image ? await ipfsEndpoints.add(image) : ''
+    const brand = {
+      style_cid: styleCID,
+      logo_cid: logoCID,
+    }
+
+    await setDagInOrgDataStore(ORG_SETTINGS_BRAND, brand)
+  }
 
   const openPreview = () => setPreviewOpen(true)
   const closePreview = () => setPreviewOpen(false)
@@ -87,7 +105,7 @@ const Brand = () => {
                           border: 0;
                           border-radius: 50%;
                         `}
-                        src={image || organizationLogoPlaceholder}
+                        src={URL.createObjectURL(image) || organizationLogoPlaceholder}
                         alt=""
                       />
                     </div>
@@ -157,6 +175,7 @@ const Brand = () => {
         mode='strong'
         label='Save changes'
         css={`margin-right: ${2 * GU}px`}
+        onClick={saveBrand}
       />
       <Button
         label='Reset brand'

@@ -12,7 +12,10 @@ import { appIds } from '../environment'
 
 export const IPFSStorageContext = createContext({})
 
-const quasarApi = new Quasar('http://quasar.autark.xyz:3001/api/v0')
+const quasarApi = new Quasar('https://quasar.autark.xyz:3002/api/v0')
+
+const ORG_SETTINGS_BASIC_INFO = 'ORG_SETTINGS_BASIC_INFO'
+const ORG_SETTINGS_BRAND = 'ORG_SETTINGS_BRAND'
 
 const NO_STORAGE_APP_INSTALLED = 'noStorageAppInstalled'
 const IPFS_PROVIDER_CONNECTION_SUCCESS = 'ipfsProviderConnectionSuccess'
@@ -93,6 +96,8 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
     initialStorageContextValue
   )
   const [storageContract, setStorageContract] = useState({})
+  const [orgInfo, setOrgInfo] = useState()
+  const [fetchedData, setFetchedData] = useState(false)
 
   // dag helpers
   const setDagInOrgDataStore = useCallback(
@@ -226,10 +231,42 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
     ipfsStore.ipfsProviderConnecting,
   ])
 
+  useEffect(() => {
+    const fetchOrgInfo = async () => {
+      const [basicInfo, {style_cid, logo_cid}] = await Promise.all([
+        getDagFromOrgDataStore(ORG_SETTINGS_BASIC_INFO),
+        getDagFromOrgDataStore(ORG_SETTINGS_BRAND)
+      ])
+      const data = basicInfo || {}
+      if (style_cid) {
+        const style = await ipfsStore.ipfsEndpoints.dag.get(style_cid)
+        if (style) {
+          data.background = style.background
+          data.accentColor = style.accentColor
+          data.accentColor2 = style.accentColor2
+        }
+      }
+      if (logo_cid) {
+        const logo = await ipfsStore.ipfsEndpoints.cat(logo_cid)
+        if (logo && logo.ok) {
+          const arrayBuffer = await logo.arrayBuffer()
+          data.image = URL.createObjectURL(new Blob([arrayBuffer], { type: "image/jpeg" } ))
+        }
+      }
+      setOrgInfo(data)
+      setFetchedData(true)
+    }
+
+    if (!fetchedData && ipfsStore.ipfsProviderConnectionSuccess) {
+      fetchOrgInfo()
+    }
+  }, [fetchedData, ipfsStore.ipfsProviderConnectionSuccess])
+
   return (
     <IPFSStorageContext.Provider
       value={{
         ...ipfsStore,
+        orgInfo,
         setDagInOrgDataStore,
         getDagFromOrgDataStore,
         setFileInOrgDataStore,
