@@ -33,7 +33,7 @@ const initialEmbeddedTemplates = sortedEmbeddedTemplates.map(template => ({
   status: TEMPLATE_LOADING,
 }))
 
-function Onboarding({ locator, status, selectorNetworks, walletWeb3, web3 }) {
+function Onboarding({ locator, status, selectorNetworks, web3 }) {
   const theme = useTheme()
 
   const {
