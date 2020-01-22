@@ -44,7 +44,7 @@
     "lodash.memoize": "^4.1.2",
     "lodash.throttle": "^4.1.1",
     "lodash.uniqby": "^4.7.0",
-    "multicodec": "^0.5.6",
+    "multicodec": "0.5.6",
     "prop-types": "^15.6.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",

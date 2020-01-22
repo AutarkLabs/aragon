@@ -13,6 +13,7 @@ import SignerPanel from './components/SignerPanel/SignerPanel'
 import UpgradeBanner from './components/Upgrade/UpgradeBanner'
 import UpgradeModal from './components/Upgrade/UpgradeModal'
 import UpgradeOrganizationPanel from './components/Upgrade/UpgradeOrganizationPanel'
+import { useWallet } from './wallet'
 import { useIdentity } from './components/IdentityManager/IdentityManager'
 import {
   AppType,
@@ -422,7 +423,7 @@ class Wrapper extends React.PureComponent {
           enableWallet={onRequestEnable}
           onSignatures={onSignatures}
           parts={locator.parts}
-          web3Provider={walletWeb3.currentProvider}
+          web3Provider={web3}
         />
       )
     }
@@ -457,6 +458,7 @@ const BannerWrapper = styled.div`
 `
 
 export default props => {
+  const { account } = useWallet()
   const { identityEvents$ } = useIdentity()
-  return <Wrapper {...props} identityEvents$={identityEvents$} />
+  return <Wrapper {...props} account={account} identityEvents$={identityEvents$} />
 }

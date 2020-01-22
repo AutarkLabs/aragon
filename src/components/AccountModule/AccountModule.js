@@ -19,7 +19,7 @@ import { useWallet } from '../../wallet'
 import NotConnected from './NotConnected'
 import ConnectionInfo from './ConnectionInfo'
 import { useNetworkConnectionData } from './utils'
-import { useAccount } from '../../account'
+import { getAppPath } from '../../routing'
 
 // Metamask seems to take about ~200ms to send the connected accounts.
 // This is to avoid a flash with the connection button.
@@ -70,16 +70,15 @@ function AccountModule({ compact, locator }) {
 }
 
 AccountModule.propTypes = {
-  compact: PropTypes.bool.isRequired,
+  compact: PropTypes.bool,
   locator: PropTypes.object.isRequired,
 }
 
 function ConnectedMode({ locator }) {
-  const { address, label, networkId } = useAccount()
   const theme = useTheme()
+  const { account } = useWallet()
   const [opened, setOpened] = useState(false)
-  const wallet = useWallet()
-  const { name: label } = useLocalIdentity(wallet.account)
+  const { name: label } = useLocalIdentity(account)
 
   const close = () => setOpened(false)
   const toggle = () => setOpened(opened => !opened)
@@ -102,7 +101,9 @@ function ConnectedMode({ locator }) {
           background: ${theme.surfacePressed};
         }
       `}
-      href={`${window.location.origin}#/${locator.dao}/profile/${address}`}
+      href={`${window.location.origin}#${getAppPath(
+        locator
+      )}/profile/${account}`}
     >
       <ButtonBase
         onClick={toggle}
@@ -125,7 +126,7 @@ function ConnectedMode({ locator }) {
           `}
         >
           <div css="position: relative">
-            <EthIdenticon address={wallet.account} radius={RADIUS} />
+            <EthIdenticon address={account} radius={RADIUS} />
             <div
               css={`
                 position: absolute;
@@ -165,7 +166,7 @@ function ConnectedMode({ locator }) {
                   {label}
                 </div>
               ) : (
-                <div>{shortenAddress(wallet.account)}</div>
+                <div>{shortenAddress(account)}</div>
               )}
             </div>
             <div
@@ -197,7 +198,7 @@ function ConnectedMode({ locator }) {
         visible={opened}
         opener={containerRef.current}
       >
-        <ConnectionInfo address={wallet.account} />
+        <ConnectionInfo address={account} />
       </Popover>
     </a>
   )
