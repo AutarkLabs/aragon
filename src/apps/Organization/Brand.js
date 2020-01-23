@@ -3,7 +3,7 @@ import Dropzone from 'react-dropzone'
 import { Box, Button, DropDown, GU, IconUpload, Info, Modal, Switch, TextInput, textStyle, useTheme } from '@aragon/ui'
 import organizationLogoPlaceholder from '../../assets/organization-logo-placeholder.png'
 import Label from './Label'
-import { useOrganizationDataStore } from '../../hooks'
+import { useOrganizationDataStore, useOrgInfo } from '../../hooks'
 
 const ORG_SETTINGS_BRAND = 'ORG_SETTINGS_BRAND'
 
@@ -14,29 +14,29 @@ const Brand = () => {
   const [background, setBackground] = useState(true)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [accentStyle, setAccentStyle] = useState(0)
-  const [accentColor, setAccentColor] = useState('')
-  const [accentColor2, setAccentColor2] = useState('')
-  const changeAccentColor = e => setAccentColor(e.target.value)
-  const changeAccentColor2 = e => setAccentColor2(e.target.value)
+  const [accentStart, setAccentStart] = useState('')
+  const [accentEnd, setAccentEnd] = useState('')
+  const changeAccentStart = e => setAccentStart(e.target.value)
+  const changeAccentEnd = e => setAccentEnd(e.target.value)
 
   const colorRX = /^#(([a-f0-9]{3}){1,2})$/i
-  const colorError = accentColor && !colorRX.test(accentColor)
+  const colorError = accentStart && !colorRX.test(accentStart)
   const {
-    orgInfo,
     ipfsEndpoints,
     setDagInOrgDataStore,
     getDagFromOrgDataStore,
     ipfsProviderConnectionSuccess,
     isStorageAppInstalled,
   } = useOrganizationDataStore()
+  const { orgInfo } = useOrgInfo()
 
   useEffect(() => {
     const setBrand = async () => {
       setBackground(orgInfo.background)
-      setAccentColor(orgInfo.accentColor)
-      if (orgInfo.accentColor2) {
+      setAccentStart(orgInfo.theme.accentStart)
+      if (orgInfo.theme.accentEnd) {
         setAccentStyle(1)
-        setAccentColor2(orgInfo.accentColor2)
+        setAccentEnd(orgInfo.theme.accentEnd)
       }
       const imageBlob = await fetch(orgInfo.image).then(r => r.blob());
       setImage(imageBlob)
@@ -58,8 +58,12 @@ const Brand = () => {
     }
     const style = {
       background: background,
-      accentColor: accentColor,
-      accentColor2: accentColor2
+      theme: {
+        accent: accentStyle && accentEnd || accentStart,
+        accentStart: accentStart,
+        accentEnd: accentStyle && accentEnd || accentStart,
+        selected: accentStyle && accentEnd || accentStart,
+      }
     }
     const styleCID = await ipfsEndpoints.dag.put(style)
     const logoCID = image ? await ipfsEndpoints.add(image) : ''
@@ -68,7 +72,18 @@ const Brand = () => {
       logo_cid: logoCID,
     }
 
-    await setDagInOrgDataStore(ORG_SETTINGS_BRAND, brand)
+    setDagInOrgDataStore(ORG_SETTINGS_BRAND, brand)
+  }
+
+  const resetBrand = () => {
+    setImage()
+    setFile()
+    setBackground(true)
+    setPreviewOpen(false)
+    setAccentStyle(0)
+    setAccentStart('')
+    setAccentEnd('')
+    saveBrand()
   }
 
   const openPreview = () => setPreviewOpen(true)
@@ -141,10 +156,11 @@ const Brand = () => {
                   border: 1px solid ${colorError ? 'red' : '#DDE4E9'};
                   width: 120px;
                   margin-right: ${2 * GU}px;
+                  margin-bottom: ${2 * GU}px;
                 `}
-                value={accentColor}
+                value={accentStart}
                 placeholder={accentStyle == 1 ? 'First hex' : ''}
-                onChange={changeAccentColor}
+                onChange={changeAccentStart}
               />
               {accentStyle == 1 && (
                 <TextInput
@@ -152,10 +168,11 @@ const Brand = () => {
                     border: 1px solid ${colorError ? 'red' : '#DDE4E9'};
                     width: 120px;
                     margin-right: ${2 * GU}px;
+                    margin-bottom: ${2 * GU}px;
                   `}
-                  value={accentColor2}
+                  value={accentEnd}
                   placeholder='Second hex'
-                  onChange={changeAccentColor2}
+                  onChange={changeAccentEnd}
                 />
               )}
               <Button
@@ -179,6 +196,7 @@ const Brand = () => {
       />
       <Button
         label='Reset brand'
+        onClick={resetBrand}
       />
       <Modal visible={previewOpen} onClose={closePreview}>
         <h2 css={`${textStyle('title2')}; margin-bottom: ${4 * GU}px`}>Accent preview</h2>
@@ -186,8 +204,8 @@ const Brand = () => {
         <Button
           mode='strong'
           label='Hello world'
-          css={accentColor &&`
-            background: linear-gradient( 190deg, ${accentColor} -100%, ${accentColor2 ? accentColor2 : accentColor} 80% ) !important;
+          css={accentStart &&`
+            background: linear-gradient( 190deg, ${accentStart} -100%, ${accentStyle && accentEnd || accentStart} 80% ) !important;
           `}
         />
         <div css={`margin-top: ${2 * GU}px; text-align: right`}>

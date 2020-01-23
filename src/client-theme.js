@@ -10,18 +10,30 @@ function ClientThemeProvider(props) {
 
   const toggleAppearance = useCallback(() => {
     const newAppearance = appearance === 'light' ? 'dark' : 'light'
+    const newTheme = theme ? {
+      ...theme,
+      _name: newAppearance,
+      _appearance: newAppearance,
+    } : null
     setAppearance(newAppearance)
-    setTheme(null)
-    setClientTheme(newAppearance)
-  }, [appearance])
+    setTheme(newTheme)
+    setClientTheme(newAppearance, newTheme)
+  }, [appearance, theme])
+
+  const updateClientTheme = useCallback((appearance, theme) => {
+    setAppearance(appearance)
+    setTheme(theme)
+    setClientTheme(appearance, theme)
+  })
 
   const clientTheme = useMemo(
     () => ({
       appearance,
       theme,
       toggleAppearance,
+      updateClientTheme,
     }),
-    [appearance, theme, toggleAppearance]
+    [appearance, theme, toggleAppearance, updateClientTheme]
   )
 
   return <ClientThemeContext.Provider value={clientTheme} {...props} />

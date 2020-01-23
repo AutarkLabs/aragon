@@ -4,10 +4,10 @@ import { DaoItemType } from '../../../prop-types'
 import { getKnownOrganization } from '../../../known-organizations'
 import { network } from '../../../environment'
 import OrgIcon from '../../OrgIcon/OrgIcon'
-import { useOrganizationDataStore } from '../../../hooks'
+import { useOrgInfo } from '../../../hooks'
 
 const OrganizationItem = ({ dao, ...props }) => {
-  const { orgInfo } = useOrganizationDataStore()
+  const { orgInfo } = useOrgInfo()
   const knownOrg = orgInfo || getKnownOrganization(network.type, dao.address)
 
   return (

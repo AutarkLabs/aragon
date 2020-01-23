@@ -50,9 +50,9 @@ if (packageVersion !== lastPackageVersion) {
 }
 
 function Providers() {
-  const { appearance } = useClientTheme()
+  const { appearance, theme } = useClientTheme()
   return (
-    <Main layout={false} scrollView={false} theme={appearance}>
+    <Main layout={false} scrollView={false} theme={theme || appearance}>
       <HelpScoutProvider>
         <ConsoleVisibleProvider>
           <GlobalErrorHandler>
