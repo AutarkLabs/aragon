@@ -15,6 +15,7 @@ import keycodes from './keycodes'
 import { log, removeStartingSlash } from './utils'
 import { addressesEqual } from './web3-utils'
 import { IPFSStorageContext } from './contexts/IpfsStorageContext'
+import { OrgInfoContext } from './contexts/OrgInfoContext'
 
 // Update `now` at a given interval.
 export function useNow(updateEvery = 1000) {
@@ -334,7 +335,6 @@ export function usePrefersDarkMode() {
 
 export const useOrganizationDataStore = () => {
   const {
-    orgInfo,
     ipfsEndpoints,
     ipfsProviderConnectionSuccess,
     ipfsProviderConnectionFailure,
@@ -348,7 +348,6 @@ export const useOrganizationDataStore = () => {
   } = useContext(IPFSStorageContext)
 
   return {
-    orgInfo,
     ipfsEndpoints,
     ipfsProviderConnectionSuccess,
     ipfsProviderConnectionFailure,
@@ -359,5 +358,13 @@ export const useOrganizationDataStore = () => {
     isStorageAppInstalled,
     getFileFromOrgDataStore,
     setFileInOrgDataStore,
+  }
+}
+
+export const useOrgInfo = () => {
+  const { orgInfo, fetchOrgInfo } = useContext(OrgInfoContext)
+  return {
+    orgInfo,
+    fetchOrgInfo,
   }
 }

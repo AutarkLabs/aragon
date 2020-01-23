@@ -4,10 +4,10 @@ import { GU, EthIdenticon } from '@aragon/ui'
 import { network } from '../../environment'
 import { getKnownOrganization } from '../../known-organizations'
 import { EthereumAddressType } from '../../prop-types'
-import { useOrganizationDataStore } from '../../hooks'
+import { useOrgInfo } from '../../hooks'
 
 function OrgIcon({ orgAddress, size }) {
-  const { orgInfo } = useOrganizationDataStore()
+  const { orgInfo } = useOrgInfo()
   const knownOrg = orgInfo || getKnownOrganization(network.type, orgAddress)
   const knownOrgImage = knownOrg && knownOrg.image
 

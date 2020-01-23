@@ -4,6 +4,7 @@ import { CardLayout, Card, GU, textStyle, useLayout } from '@aragon/ui'
 import { AppType } from '../../prop-types'
 import { appIds } from '../../environment'
 import { useClientTheme } from '../../client-theme'
+import { useOrgInfo } from '../../hooks'
 
 import imgEagle from '../../assets/eagle.svg'
 import imgAssignTokens from './assets/assign-tokens.png'
@@ -39,6 +40,7 @@ const ACTIONS = [
 function Home({ apps, onOpenApp }) {
   const { layoutWidth, layoutName } = useLayout()
   const { appearance } = useClientTheme()
+  const { orgInfo } = useOrgInfo()
 
   const appActions = useMemo(
     () =>
@@ -87,7 +89,7 @@ function Home({ apps, onOpenApp }) {
         display: grid;
         align-items: center;
         justify-content: center;
-        background: ${background};
+        background: ${orgInfo && !orgInfo.background ? 'none' : background};
         overflow: auto;
       `}
     >

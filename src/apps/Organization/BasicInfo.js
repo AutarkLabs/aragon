@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { Box, Button, GU, TextInput } from '@aragon/ui'
 import Label from './Label'
-import { useOrganizationDataStore } from '../../hooks'
+import { useOrganizationDataStore, useOrgInfo } from '../../hooks'
 
 const ORG_SETTINGS_BASIC_INFO = 'ORG_SETTINGS_BASIC_INFO'
 
 const BasicInfo = () => {
   const {
-    orgInfo,
     setDagInOrgDataStore,
     getDagFromOrgDataStore,
     ipfsProviderConnectionSuccess,
   } = useOrganizationDataStore()
+  const { orgInfo } = useOrgInfo()
   const [basicInfo, setBasicInfo] = useState({
     name: '',
     website: '',
