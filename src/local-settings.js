@@ -6,6 +6,7 @@ const ENS_REGISTRY_ADDRESS = 'ENS_REGISTRY_ADDRESS'
 const ETH_NETWORK_TYPE = 'ETH_NETWORK_TYPE'
 const ETH_SUBSCRIPTION_EVENT_DELAY = 'ETH_SUBSCRIPTION_EVENT_DELAY'
 const IPFS_GATEWAY = 'IPFS_GATEWAY'
+const ORG_INFO = 'ORG_INFO'
 const PACKAGE_VERSION = 'PACKAGE_VERSION'
 const SELECTED_CURRENCY = 'SELECTED_CURRENCY'
 const SENTRY_DSN = 'SENTRY_DSN'
@@ -54,6 +55,7 @@ const CONFIGURATION_VARS = [
     process.env.REACT_APP_PACKAGE_VERSION,
   ],
   [CLIENT_THEME, process.env.ARAGON_CLIENT_THEME],
+  [ORG_INFO, process.env.ARAGON_ORG_INFO]
 ].reduce(
   (acc, [option, envValue, envValueCompat]) => ({
     ...acc,
@@ -163,4 +165,21 @@ export function getClientTheme() {
 
 export function setClientTheme(appearance, theme = null) {
   return setLocalSetting(CLIENT_THEME, JSON.stringify({ appearance, theme }))
+}
+
+export function getClientOrgInfo() {
+  const storedOrgInfo = getLocalStorageSetting(ORG_INFO)
+  if (storedOrgInfo) {
+    const data = JSON.parse(storedOrgInfo)
+    const arrayBuffer = Uint32Array.from(JSON.parse(data.image)).buffer
+    return {
+      ...data,
+      image: URL.createObjectURL(new Blob([arrayBuffer], { type: "image/jpeg" } ))
+    }
+  }
+  return
+}
+
+export function setClientOrgInfo(data) {
+  return setLocalSetting(ORG_INFO, JSON.stringify(data))
 }
