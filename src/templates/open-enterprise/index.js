@@ -162,7 +162,7 @@ export const conditionalScreens = () => [
 ]
 
 export default {
-  id: 'open-enterprise-template.aragonpm.eth',
+  id: 'open-enterprise-template.hatch.aragonpm.eth',
   name: 'Open Enterprise',
   header,
   icon,
