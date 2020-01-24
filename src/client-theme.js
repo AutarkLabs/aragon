@@ -10,11 +10,13 @@ function ClientThemeProvider(props) {
 
   const toggleAppearance = useCallback(() => {
     const newAppearance = appearance === 'light' ? 'dark' : 'light'
-    const newTheme = theme ? {
-      ...theme,
-      _name: newAppearance,
-      _appearance: newAppearance,
-    } : null
+    const newTheme = theme
+      ? {
+          ...theme,
+          _name: newAppearance,
+          _appearance: newAppearance,
+        }
+      : null
     setAppearance(newAppearance)
     setTheme(newTheme)
     setClientTheme(newAppearance, newTheme)
@@ -24,7 +26,7 @@ function ClientThemeProvider(props) {
     setAppearance(appearance)
     setTheme(theme)
     setClientTheme(appearance, theme)
-  })
+  }, [])
 
   const clientTheme = useMemo(
     () => ({

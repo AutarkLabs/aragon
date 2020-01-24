@@ -419,9 +419,11 @@ class App extends React.Component {
                 <OrgInfoProvider>
                   <CustomToast>
                     <IdentityProvider onResolve={this.handleIdentityResolve}>
-                        <LocalIdentityModalProvider
-                          onShowLocalIdentityModal={this.handleOpenLocalIdentityModal}
-                        >
+                      <LocalIdentityModalProvider
+                        onShowLocalIdentityModal={
+                          this.handleOpenLocalIdentityModal
+                        }
+                      >
                         <LocalIdentityModal
                           address={intentAddress}
                           label={intentLabel}
@@ -471,7 +473,8 @@ class App extends React.Component {
                               locator={locator}
                               selectorNetworks={selectorNetworks}
                               status={
-                                mode === APP_MODE_START || mode === APP_MODE_SETUP
+                                mode === APP_MODE_START ||
+                                mode === APP_MODE_SETUP
                                   ? locator.action || 'welcome'
                                   : 'none'
                               }

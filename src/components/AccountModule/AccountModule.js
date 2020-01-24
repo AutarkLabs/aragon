@@ -62,7 +62,11 @@ function AccountModule({ compact, locator }) {
             align-items: center;
           `}
         >
-          {isConnected ? <ConnectedMode locator={locator} /> : <NotConnected compact={compact} />}
+          {isConnected ? (
+            <ConnectedMode locator={locator} />
+          ) : (
+            <NotConnected compact={compact} />
+          )}
         </AnimatedDiv>
       )}
     </Spring>

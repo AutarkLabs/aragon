@@ -423,7 +423,7 @@ class Wrapper extends React.PureComponent {
           enableWallet={onRequestEnable}
           onSignatures={onSignatures}
           parts={locator.parts}
-          web3Provider={web3}
+          web3Provider={window.web3}
         />
       )
     }
@@ -460,5 +460,7 @@ const BannerWrapper = styled.div`
 export default props => {
   const { account } = useWallet()
   const { identityEvents$ } = useIdentity()
-  return <Wrapper {...props} account={account} identityEvents$={identityEvents$} />
+  return (
+    <Wrapper {...props} account={account} identityEvents$={identityEvents$} />
+  )
 }

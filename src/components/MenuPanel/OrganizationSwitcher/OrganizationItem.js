@@ -36,5 +36,8 @@ const OrganizationItem = ({ dao, ...props }) => {
   )
 }
 
+OrganizationItem.propTypes = {
+  dao: DaoItemType.isRequired,
+}
 
 export default OrganizationItem

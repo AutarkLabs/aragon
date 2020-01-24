@@ -55,7 +55,7 @@ const CONFIGURATION_VARS = [
     process.env.REACT_APP_PACKAGE_VERSION,
   ],
   [CLIENT_THEME, process.env.ARAGON_CLIENT_THEME],
-  [ORG_INFO, process.env.ARAGON_ORG_INFO]
+  [ORG_INFO, process.env.ARAGON_ORG_INFO],
 ].reduce(
   (acc, [option, envValue, envValueCompat]) => ({
     ...acc,
@@ -174,10 +174,11 @@ export function getClientOrgInfo() {
     const arrayBuffer = Uint32Array.from(JSON.parse(data.image)).buffer
     return {
       ...data,
-      image: URL.createObjectURL(new Blob([arrayBuffer], { type: "image/jpeg" } ))
+      image: URL.createObjectURL(
+        new Blob([arrayBuffer], { type: 'image/jpeg' })
+      ),
     }
   }
-  return
 }
 
 export function setClientOrgInfo(data) {

@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useClientTheme } from '../client-theme'
 import { setClientOrgInfo, getClientOrgInfo } from '../local-settings'
@@ -10,7 +10,7 @@ const CLIENT_ORG_INFO = getClientOrgInfo()
 
 export const OrgInfoContext = createContext({})
 
-export const OrgInfoProvider = ({children}) => {
+export const OrgInfoProvider = ({ children }) => {
   const {
     ipfsEndpoints,
     getDagFromOrgDataStore,
@@ -20,26 +20,33 @@ export const OrgInfoProvider = ({children}) => {
   const [orgInfo, setOrgInfo] = useState(CLIENT_ORG_INFO)
   const [fetchedData, setFetchedData] = useState(false)
 
-  const fetchOrgInfo = async () => {
-    const [basicInfo, {style_cid, logo_cid}] = await Promise.all([
+  const fetchOrgInfo = useCallback(async () => {
+    const [
+      basicInfo,
+      { style_cid: styleCid, logo_cid: logoCid },
+    ] = await Promise.all([
       getDagFromOrgDataStore(ORG_SETTINGS_BASIC_INFO),
-      getDagFromOrgDataStore(ORG_SETTINGS_BRAND)
+      getDagFromOrgDataStore(ORG_SETTINGS_BRAND),
     ])
     const data = basicInfo || {}
-    if (style_cid) {
-      const style = await ipfsEndpoints.dag.get(style_cid)
+    if (styleCid) {
+      const style = await ipfsEndpoints.dag.get(styleCid)
       if (style) {
         data.background = style.background
         data.theme = style.theme
       }
     }
-    const clientData = {...data} //images stored in local storage will differ than stored in state, thus two objects
-    if (logo_cid) {
-      const logo = await ipfsEndpoints.cat(logo_cid)
+    const clientData = { ...data } // images stored in local storage will differ than stored in state, thus two objects
+    if (logoCid) {
+      const logo = await ipfsEndpoints.cat(logoCid)
       if (logo && logo.ok) {
         const arrayBuffer = await logo.arrayBuffer()
-        data.image = URL.createObjectURL(new Blob([arrayBuffer], { type: "image/jpeg" } ))
-        clientData.image = JSON.stringify(Array.from(new Uint32Array(arrayBuffer)))
+        data.image = URL.createObjectURL(
+          new Blob([arrayBuffer], { type: 'image/jpeg' })
+        )
+        clientData.image = JSON.stringify(
+          Array.from(new Uint32Array(arrayBuffer))
+        )
       }
     }
 
@@ -47,21 +54,18 @@ export const OrgInfoProvider = ({children}) => {
     setClientOrgInfo(clientData)
     setFetchedData(true)
 
-    updateClientTheme(
-      appearance,
-      {
-        ...data.theme,
-        _name: appearance,
-        _appearance: appearance,
-      }
-    )
-  }
+    updateClientTheme(appearance, {
+      ...data.theme,
+      _name: appearance,
+      _appearance: appearance,
+    })
+  }, [appearance, getDagFromOrgDataStore, ipfsEndpoints, updateClientTheme])
 
   useEffect(() => {
     if (!fetchedData && ipfsProviderConnectionSuccess) {
       fetchOrgInfo()
     }
-  }, [ipfsProviderConnectionSuccess])
+  }, [fetchOrgInfo, fetchedData, ipfsProviderConnectionSuccess])
 
   return (
     <OrgInfoContext.Provider value={{ orgInfo, fetchOrgInfo }}>
