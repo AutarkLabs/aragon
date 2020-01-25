@@ -290,7 +290,7 @@ const initWrapper = async (
       subscriptionEventDelay: getEthSubscriptionEventDelay(),
     },
     datastore: {
-      host: 'http://quasar.autark.xyz:3001/api/v0',
+      host: 'https://quasar.autark.xyz:3002/api/v0',
     },
   })
 

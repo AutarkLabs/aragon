@@ -22,7 +22,6 @@ const ORG_SETTINGS_BRAND = 'ORG_SETTINGS_BRAND'
 const Brand = () => {
   const theme = useTheme()
   const [image, setImage] = useState()
-  const [, setFile] = useState()
   const [background, setBackground] = useState(true)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [accentStyle, setAccentStyle] = useState(0)
@@ -85,7 +84,6 @@ const Brand = () => {
 
   const resetBrand = () => {
     setImage()
-    setFile()
     setBackground(true)
     setPreviewOpen(false)
     setAccentStyle(0)
