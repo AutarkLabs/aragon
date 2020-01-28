@@ -154,14 +154,14 @@ class Wrapper extends React.PureComponent {
     }
   }
 
-  openApp = (instanceId, { params, localPath } = {}) => {
+  openApp = (instanceId, { instancePath } = {}) => {
     const { historyPush, locator, account } = this.props
     instanceId === 'profile'
       ? historyPush(
           `${getAppPath({ dao: locator.dao, instanceId })}/${account}`
         )
       : historyPush(
-          getAppPath({ dao: locator.dao, instanceId, params, localPath })
+          getAppPath({ dao: locator.dao, instanceId, instancePath })
         )
   }
 
