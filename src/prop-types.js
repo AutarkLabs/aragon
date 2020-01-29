@@ -276,13 +276,10 @@ export const WalletType = PropTypes.shape({
 
 export const AragonUiAppearanceType = PropTypes.oneOf(['dark', 'light'])
 
-export const AragonUiThemeType = PropTypes.oneOf([
-  PropTypes.string,
-  PropTypes.shape({
-    _name: PropTypes.string.isRequired,
-    _appearance: AragonUiAppearanceType.isRequired,
-  }),
-])
+export const AragonUiThemeType = PropTypes.shape({
+  _name: PropTypes.string.isRequired,
+  _appearance: AragonUiAppearanceType.isRequired,
+})
 
 export const ClientThemeType = PropTypes.shape({
   theme: AragonUiThemeType,

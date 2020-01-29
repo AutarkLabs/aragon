@@ -7,7 +7,8 @@ import { EthereumAddressType } from '../../prop-types'
 import { useOrgInfo } from '../../hooks'
 
 function OrgIcon({ orgAddress, size }) {
-  const { orgInfo } = useOrgInfo()
+  const { getThisOrg } = useOrgInfo()
+  const orgInfo = getThisOrg()
   const knownOrg = orgInfo || getKnownOrganization(network.type, orgAddress)
   const knownOrgImage = knownOrg && knownOrg.image
 

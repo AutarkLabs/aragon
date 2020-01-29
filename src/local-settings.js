@@ -170,14 +170,22 @@ export function setClientTheme(appearance, theme = null) {
 export function getClientOrgInfo() {
   const storedOrgInfo = getLocalStorageSetting(ORG_INFO)
   if (storedOrgInfo) {
-    const data = JSON.parse(storedOrgInfo)
-    const arrayBuffer = Uint32Array.from(JSON.parse(data.image)).buffer
-    return {
-      ...data,
-      image: URL.createObjectURL(
-        new Blob([arrayBuffer], { type: 'image/jpeg' })
-      ),
-    }
+    try {
+      const data = JSON.parse(storedOrgInfo)
+      Object.entries(data).forEach(([key, value]) => {
+        if(value.image) {
+          const arrayBuffer = Uint32Array.from(JSON.parse(value.image)).buffer
+          const newValue = {
+            ...value,
+            image: URL.createObjectURL(
+              new Blob([arrayBuffer], { type: 'image/jpeg' })
+            ),
+          }
+          data[key] = newValue
+        }
+      })
+      return data
+    } catch (err) {}
   }
 }
 

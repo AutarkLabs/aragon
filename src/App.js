@@ -5,7 +5,9 @@ import { Spring, animated } from 'react-spring'
 import { useTheme } from '@aragon/ui'
 import { EthereumAddressType, ClientThemeType } from './prop-types'
 import { network, web3Providers } from './environment'
+import { setClientOrgInfo, getClientOrgInfo } from './local-settings'
 import { useClientTheme } from './client-theme'
+
 import {
   ARAGONID_ENS_DOMAIN,
   getAppPath,
@@ -44,6 +46,7 @@ import {
   DAO_STATUS_LOADING,
   DAO_STATUS_UNLOADED,
 } from './symbols'
+const CLIENT_ORG_INFO = getClientOrgInfo()
 
 const INITIAL_DAO_STATE = {
   apps: [],
@@ -79,8 +82,10 @@ class App extends React.Component {
     ...INITIAL_DAO_STATE,
     connected: false,
     fatalError: null,
+    fetchedData: false,
     identityIntent: null,
     locator: {},
+    //orgInfo: CLIENT_ORG_INFO,
     prevLocator: null,
     selectorNetworks: SELECTOR_NETWORKS,
     transactionBag: null,
@@ -118,6 +123,9 @@ class App extends React.Component {
     }
   }
 
+  setFetchedData = bool => this.setState({ fetchedData: bool})
+  //setOrgInfo = data => this.setState({ orgInfo: data})
+
   // Handle URL changes
   handleHistoryChange = ({ pathname, search, state = {} }) => {
     if (!state.alreadyParsed) {
@@ -145,7 +153,7 @@ class App extends React.Component {
     const { locator: prevLocator } = this.state
 
     // New DAO: need to reinit the wrapper
-    if (locator.dao && (!prevLocator || locator.dao !== prevLocator.dao)) {
+    if (locator.dao && (Object.keys(prevLocator).length === 0 || locator.dao !== prevLocator.dao)) {
       this.updateDao(locator.dao)
     }
 
@@ -169,6 +177,10 @@ class App extends React.Component {
 
   updateDao(dao = null) {
     const { clientTheme, walletAccount } = this.props
+
+    clientTheme.updateClientTheme(clientTheme.appearance, null)
+    this.setFetchedData(false)
+
     // Cancel the subscriptions / unload the wrapper
     if (this.state.wrapper) {
       this.state.wrapper.cancel()
@@ -364,8 +376,10 @@ class App extends React.Component {
       daoAddress,
       daoStatus,
       fatalError,
+      fetchedData,
       identityIntent,
       locator,
+      orgInfo,
       permissions,
       permissionsLoading,
       repos,
@@ -415,8 +429,19 @@ class App extends React.Component {
                 transform: scale.interpolate(v => `scale3d(${v}, ${v}, 1)`),
               }}
             >
-              <IPFSStorageProvider apps={apps} wrapper={wrapper}>
-                <OrgInfoProvider>
+              <IPFSStorageProvider
+                apps={apps}
+                dao={daoAddress.address}
+                wrapper={wrapper}
+              >
+                <OrgInfoProvider
+                  dao={daoAddress.address}
+                  fetchedData={fetchedData}
+                  setFetchedData={this.setFetchedData}
+                  //orgInfo={orgInfo}
+                  //setOrgInfo={this.setOrgInfo}
+                  wrapper={wrapper}
+                >
                   <CustomToast>
                     <IdentityProvider onResolve={this.handleIdentityResolve}>
                       <LocalIdentityModalProvider

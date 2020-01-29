@@ -7,7 +7,8 @@ import OrgIcon from '../../OrgIcon/OrgIcon'
 import { useOrgInfo } from '../../../hooks'
 
 const OrganizationItem = ({ dao, ...props }) => {
-  const { orgInfo } = useOrgInfo()
+  const { getOrg } = useOrgInfo()
+  const orgInfo = getOrg(dao.address)
   const knownOrg = orgInfo || getKnownOrganization(network.type, dao.address)
 
   return (

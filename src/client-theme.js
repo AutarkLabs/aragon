@@ -25,7 +25,6 @@ function ClientThemeProvider(props) {
   const updateClientTheme = useCallback((appearance, theme) => {
     setAppearance(appearance)
     setTheme(theme)
-    setClientTheme(appearance, theme)
   }, [])
 
   const clientTheme = useMemo(

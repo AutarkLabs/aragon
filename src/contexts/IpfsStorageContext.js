@@ -14,6 +14,7 @@ export const IPFSStorageContext = createContext({})
 
 const quasarApi = new Quasar('https://quasar.autark.xyz:3002/api/v0')
 
+const INITIALIZE = 'initialize'
 const NO_STORAGE_APP_INSTALLED = 'noStorageAppInstalled'
 const IPFS_PROVIDER_CONNECTION_SUCCESS = 'ipfsProviderConnectionSuccess'
 const IPFS_PROVIDER_CONNECTION_FAILURE = 'ipfsProviderConnectionFailure'
@@ -30,6 +31,8 @@ const initialStorageContextValue = {
 
 const reducer = (state, action) => {
   switch (action.type) {
+    case INITIALIZE:
+     return initialStorageContextValue
     case NO_STORAGE_APP_INSTALLED:
       return {
         ...initialStorageContextValue,
@@ -79,6 +82,10 @@ export const connectionFailure = error => ({
   error,
 })
 
+export const initialize = () => ({
+  type: INITIALIZE,
+})
+
 export const connecting = () => ({
   type: IPFS_PROVIDER_CONNECTING,
 })
@@ -87,7 +94,7 @@ const noStorageApp = () => ({
   type: NO_STORAGE_APP_INSTALLED,
 })
 
-export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
+export const IPFSStorageProvider = ({ children, apps, dao, wrapper }) => {
   const [ipfsStore, dispatchToIpfsStore] = useReducer(
     reducer,
     initialStorageContextValue
@@ -225,6 +232,10 @@ export const IPFSStorageProvider = ({ children, apps, wrapper }) => {
     ipfsStore.ipfsProviderConnectionSuccess,
     ipfsStore.ipfsProviderConnecting,
   ])
+
+  useEffect(() => {
+    dispatchToIpfsStore(initialize())
+  }, [dao])
 
   return (
     <IPFSStorageContext.Provider

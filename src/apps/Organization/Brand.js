@@ -37,7 +37,8 @@ const Brand = () => {
     setDagInOrgDataStore,
     isStorageAppInstalled,
   } = useOrganizationDataStore()
-  const { orgInfo } = useOrgInfo()
+  const { getThisOrg } = useOrgInfo()
+  const orgInfo = getThisOrg()
 
   useEffect(() => {
     const setBrand = async () => {

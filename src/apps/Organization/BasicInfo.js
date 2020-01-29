@@ -7,7 +7,8 @@ const ORG_SETTINGS_BASIC_INFO = 'ORG_SETTINGS_BASIC_INFO'
 
 const BasicInfo = () => {
   const { setDagInOrgDataStore } = useOrganizationDataStore()
-  const { orgInfo } = useOrgInfo()
+  const { getThisOrg } = useOrgInfo()
+  const orgInfo = getThisOrg()
   const [basicInfo, setBasicInfo] = useState({
     name: '',
     website: '',

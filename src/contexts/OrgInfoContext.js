@@ -10,7 +10,15 @@ const CLIENT_ORG_INFO = getClientOrgInfo()
 
 export const OrgInfoContext = createContext({})
 
-export const OrgInfoProvider = ({ children }) => {
+export const OrgInfoProvider = ({
+  children,
+  dao,
+  fetchedData,
+  //orgInfo,
+  setFetchedData,
+  //setOrgInfo,
+  wrapper,
+}) => {
   const {
     ipfsEndpoints,
     getDagFromOrgDataStore,
@@ -18,7 +26,17 @@ export const OrgInfoProvider = ({ children }) => {
   } = useOrganizationDataStore()
   const { appearance, updateClientTheme } = useClientTheme()
   const [orgInfo, setOrgInfo] = useState(CLIENT_ORG_INFO)
-  const [fetchedData, setFetchedData] = useState(false)
+  //const [fetchedData, setFetchedData] = useState(false)
+
+  const getThisOrg = useCallback(() => {
+    if (!dao || !orgInfo) return null
+    return orgInfo[dao]
+  }, [dao])
+
+  const getOrg = useCallback((dao) => {
+    if (!dao || !orgInfo) return null
+    return orgInfo[dao]
+  })
 
   const fetchOrgInfo = useCallback(async () => {
     const [
@@ -49,9 +67,12 @@ export const OrgInfoProvider = ({ children }) => {
         )
       }
     }
-
-    setOrgInfo(data)
-    setClientOrgInfo(clientData)
+    const newOrgInfo = {...orgInfo}
+    const newClientOrgInfo = {...CLIENT_ORG_INFO}
+    newOrgInfo[dao] = data
+    newClientOrgInfo[dao] = clientData
+    setOrgInfo(newOrgInfo)
+    setClientOrgInfo(newClientOrgInfo)
     setFetchedData(true)
 
     updateClientTheme(appearance, {
@@ -59,16 +80,30 @@ export const OrgInfoProvider = ({ children }) => {
       _name: appearance,
       _appearance: appearance,
     })
-  }, [appearance, getDagFromOrgDataStore, ipfsEndpoints, updateClientTheme])
+  }, [appearance, dao, getDagFromOrgDataStore, ipfsEndpoints, updateClientTheme])
 
   useEffect(() => {
-    if (!fetchedData && ipfsProviderConnectionSuccess) {
+    //setOrgInfo(null)
+    if (!fetchedData && ipfsProviderConnectionSuccess && wrapper) {
       fetchOrgInfo()
     }
-  }, [fetchOrgInfo, fetchedData, ipfsProviderConnectionSuccess])
+  }, [dao, ipfsProviderConnectionSuccess, wrapper])
+
+  useEffect(() => {
+    if(dao && orgInfo) {
+      const data = orgInfo[dao]
+      if(data) {
+        updateClientTheme(appearance, {
+          ...data.theme,
+          _name: appearance,
+          _appearance: appearance,
+        })
+      }
+    }
+  }, [dao, orgInfo])
 
   return (
-    <OrgInfoContext.Provider value={{ orgInfo, fetchOrgInfo }}>
+    <OrgInfoContext.Provider value={{ getOrg, getThisOrg }}>
       {children}
     </OrgInfoContext.Provider>
   )

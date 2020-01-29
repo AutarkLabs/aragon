@@ -362,9 +362,5 @@ export const useOrganizationDataStore = () => {
 }
 
 export const useOrgInfo = () => {
-  const { orgInfo, fetchOrgInfo } = useContext(OrgInfoContext)
-  return {
-    orgInfo,
-    fetchOrgInfo,
-  }
+  return useContext(OrgInfoContext)
 }
