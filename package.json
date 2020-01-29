@@ -28,7 +28,7 @@
     "@aragon/ui": "^1.2.1",
     "@aragon/wrapper": "petermphillips/aragon-wrapper",
     "@babel/polyfill": "^7.0.0",
-    "@openworklabs/aragon-profile": "0.1.19",
+    "@openworklabs/aragon-profile": "petermphillips/aragon-profile",
     "@sentry/browser": "^5.5.0",
     "@ungap/event-target": "^0.1.0",
     "axios": "^0.19.0",

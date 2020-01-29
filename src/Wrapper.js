@@ -418,13 +418,15 @@ class Wrapper extends React.PureComponent {
 
     if (instanceId === 'profile') {
       return (
-        <Profile
-          account={account}
-          enableWallet={onRequestEnable}
-          onSignatures={onSignatures}
-          parts={locator.parts}
-          web3Provider={window.web3}
-        />
+        <AppInternal>
+          <Profile
+            account={account}
+            enableWallet={onRequestEnable}
+            onSignatures={onSignatures}
+            parts={locator.parts}
+            web3Provider={window.web3}
+          />
+        </AppInternal>
       )
     }
 
