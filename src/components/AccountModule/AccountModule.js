@@ -19,7 +19,6 @@ import { useWallet } from '../../wallet'
 import NotConnected from './NotConnected'
 import ConnectionInfo from './ConnectionInfo'
 import { useNetworkConnectionData } from './utils'
-import { getAppPath } from '../../routing'
 
 // Metamask seems to take about ~200ms to send the connected accounts.
 // This is to avoid a flash with the connection button.
@@ -27,7 +26,7 @@ const ACCOUNT_MODULE_DISPLAY_DELAY = 500
 
 const AnimatedDiv = animated.div
 
-function AccountModule({ compact, locator }) {
+function AccountModule({ compact }) {
   const { isConnected } = useWallet()
   const [display, setDisplay] = useState(false)
 
@@ -63,7 +62,7 @@ function AccountModule({ compact, locator }) {
           `}
         >
           {isConnected ? (
-            <ConnectedMode locator={locator} />
+            <ConnectedMode />
           ) : (
             <NotConnected compact={compact} />
           )}
@@ -75,10 +74,9 @@ function AccountModule({ compact, locator }) {
 
 AccountModule.propTypes = {
   compact: PropTypes.bool,
-  locator: PropTypes.object.isRequired,
 }
 
-function ConnectedMode({ locator }) {
+function ConnectedMode() {
   const theme = useTheme()
   const { account } = useWallet()
   const [opened, setOpened] = useState(false)
@@ -90,9 +88,9 @@ function ConnectedMode({ locator }) {
   const containerRef = useRef()
 
   const { walletNetworkName, hasNetworkMismatch } = useNetworkConnectionData()
-
+  
   return (
-    <a
+    <div
       ref={containerRef}
       css={`
         display: flex;
@@ -105,9 +103,6 @@ function ConnectedMode({ locator }) {
           background: ${theme.surfacePressed};
         }
       `}
-      href={`${window.location.origin}#${getAppPath(
-        locator
-      )}/profile/${account}`}
     >
       <ButtonBase
         onClick={toggle}
@@ -204,12 +199,8 @@ function ConnectedMode({ locator }) {
       >
         <ConnectionInfo address={account} />
       </Popover>
-    </a>
+    </div>
   )
-}
-
-ConnectedMode.propTypes = {
-  locator: PropTypes.object.isRequired,
 }
 
 export default AccountModule

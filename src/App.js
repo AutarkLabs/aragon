@@ -5,7 +5,6 @@ import { Spring, animated } from 'react-spring'
 import { useTheme } from '@aragon/ui'
 import { EthereumAddressType, ClientThemeType } from './prop-types'
 import { network, web3Providers } from './environment'
-import { setClientOrgInfo, getClientOrgInfo } from './local-settings'
 import { useClientTheme } from './client-theme'
 
 import {
@@ -46,7 +45,6 @@ import {
   DAO_STATUS_LOADING,
   DAO_STATUS_UNLOADED,
 } from './symbols'
-const CLIENT_ORG_INFO = getClientOrgInfo()
 
 const INITIAL_DAO_STATE = {
   apps: [],
@@ -85,7 +83,6 @@ class App extends React.Component {
     fetchedData: false,
     identityIntent: null,
     locator: {},
-    //orgInfo: CLIENT_ORG_INFO,
     prevLocator: null,
     selectorNetworks: SELECTOR_NETWORKS,
     transactionBag: null,
@@ -266,7 +263,8 @@ class App extends React.Component {
         let name = null
         try {
           const identity = await this.handleIdentityResolve(
-            identityIntent.address
+            identityIntent.address,
+            'local'
           )
           name = identity.name
         } catch (_) {}
@@ -334,10 +332,10 @@ class App extends React.Component {
       .catch(identityIntent.reject)
   }
 
-  handleIdentityResolve = address => {
+  handleIdentityResolve = (address, providerName = null) => {
     // returns promise
     if (this.state.wrapper) {
-      return this.state.wrapper.resolveAddressIdentity(address)
+      return this.state.wrapper.resolveAddressIdentity(address, providerName)
     } else {
       // wrapper has not been initialized
       // re-request in 100 ms
@@ -379,7 +377,6 @@ class App extends React.Component {
       fetchedData,
       identityIntent,
       locator,
-      orgInfo,
       permissions,
       permissionsLoading,
       repos,
@@ -443,7 +440,10 @@ class App extends React.Component {
                   wrapper={wrapper}
                 >
                   <CustomToast>
-                    <IdentityProvider onResolve={this.handleIdentityResolve}>
+                    <IdentityProvider
+                      locator={locator}
+                      onResolve={this.handleIdentityResolve}
+                    >
                       <LocalIdentityModalProvider
                         onShowLocalIdentityModal={
                           this.handleOpenLocalIdentityModal

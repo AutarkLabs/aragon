@@ -1,6 +1,7 @@
-import React, { useContext } from 'react'
+import React, { useContext, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { Subject } from 'rxjs'
+import { getAppPath } from '../../routing'
 
 const identityEventTypes = {
   IMPORT: 'IMPORT',
@@ -17,15 +18,20 @@ const IdentityContext = React.createContext({
     Promise.reject(Error('Please set resolve using IdentityProvider')),
 })
 
-const IdentityProvider = ({ onResolve, children }) => {
+const IdentityProvider = ({ locator, onResolve, children }) => {
+  const onNavigateToProfile = useCallback((address) => {
+    window.location = `/#${getAppPath({dao : locator.dao, instanceId: 'profile'})}${address}`
+  }, [locator])
+
   return (
-    <IdentityContext.Provider value={{ resolve: onResolve, identityEvents$ }}>
+    <IdentityContext.Provider value={{ resolve: onResolve, onNavigateToProfile, identityEvents$ }}>
       {children}
     </IdentityContext.Provider>
   )
 }
 
 IdentityProvider.propTypes = {
+  locator: PropTypes.object.isRequired,
   onResolve: PropTypes.func.isRequired,
   children: PropTypes.node.isRequired,
 }

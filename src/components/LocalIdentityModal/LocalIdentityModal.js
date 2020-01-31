@@ -38,6 +38,7 @@ LocalIdentityModal.propTypes = {
 }
 
 const LocalModal = ({ address, label, onCancel, onSave }) => {
+  const theme = useTheme()
   const [action, setAction] = React.useState(null)
   const [error, setError] = React.useState(null)
   const labelInput = React.useRef(null)
@@ -78,7 +79,7 @@ const LocalModal = ({ address, label, onCancel, onSave }) => {
 
   return (
     <EscapeOutside onEscapeOutside={onCancel}>
-      <Wrap>
+      <Wrap theme={theme}>
         <h3
           css={`
             ${textStyle('title4')};
@@ -99,7 +100,7 @@ const LocalModal = ({ address, label, onCancel, onSave }) => {
             ref={labelInput}
             maxLength="42"
           />
-          <Error>{error}</Error>
+          <Error theme={theme}>{error}</Error>
         </Label>
         <Controls>
           <Button css="min-width: 128px;" onClick={handleCancel}>
@@ -122,12 +123,12 @@ LocalModal.propTypes = {
 }
 
 const Error = styled.div`
-  color: #f56a6a;
+  color: ${({theme}) => theme.error};
   text-transform: initial;
 `
 
 const Wrap = styled.div`
-  background: #fff;
+  background: ${({theme}) => theme.surface};
   max-width: calc(100vw - 32px);
 
   ${breakpoint(

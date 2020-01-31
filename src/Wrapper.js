@@ -417,13 +417,15 @@ class Wrapper extends React.PureComponent {
     }
 
     if (instanceId === 'profile') {
+      const parts = locator.instancePath.split('/')
+      parts.shift()
       return (
         <AppInternal>
           <Profile
             account={account}
             enableWallet={onRequestEnable}
             onSignatures={onSignatures}
-            parts={locator.parts}
+            parts={parts}
             web3Provider={window.web3}
           />
         </AppInternal>

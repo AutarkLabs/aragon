@@ -12,14 +12,17 @@ import {
 import IdentityBadgeWithNetwork from './IdentityBadgeWithNetwork'
 import LocalIdentityPopoverTitle from './LocalIdentityPopoverTitle'
 
+
 function LocalIdentityBadge({ entity, forceAddress, ...props }) {
   const address = isAddress(entity) ? entity : null
-  const { identityEvents$ } = useContext(IdentityContext)
+  const { onNavigateToProfile, identityEvents$ } = useContext(IdentityContext)
   const { showLocalIdentityModal } = useContext(LocalIdentityModalContext)
-  const { name: label, handleResolve } = useLocalIdentity(address)
+  const localIdentity = useLocalIdentity(address)
+  const { name: label, source, handleResolve } = localIdentity
   const wallet = useWallet()
 
-  const handleClick = useCallback(() => {
+  const handleCustomLabel = useCallback(() => {
+    if (source == 'addressBook') return
     showLocalIdentityModal(address)
       .then(handleResolve)
       .then(() =>
@@ -28,7 +31,42 @@ function LocalIdentityBadge({ entity, forceAddress, ...props }) {
       .catch(e => {
         /* user cancelled modify intent */
       })
-  }, [address, identityEvents$, handleResolve, showLocalIdentityModal])
+  }, [address, identityEvents$, source, handleResolve, showLocalIdentityModal])
+
+  const handleProfile = useCallback(() => {
+    onNavigateToProfile(address)
+  }, [address])
+
+  const popoverAction = ({label, onClick}) => {
+    return {
+      label: (
+        <div
+          css={`
+            display: flex;
+            align-items: center;
+          `}
+        >
+          <IconLabel
+            css={`
+              margin-right: ${1 * GU}px;
+            `}
+          />
+          {label}
+        </div>
+      ),
+      onClick: onClick,
+    }
+  }
+
+  const getPopoverAction = () => {
+    if(source === 'addressBook') return null
+    if(source === '3box') {
+      const popoverLabel = 'View profile'
+      return popoverAction({label: popoverLabel, onClick: handleProfile})
+    }
+    const popoverLabel = `${label ? 'Edit' : 'Add'} custom label`
+    return popoverAction({label: popoverLabel, onClick: handleCustomLabel})
+  }
 
   if (address === null) {
     return <IdentityBadgeWithNetwork {...props} label={entity} />
@@ -40,26 +78,9 @@ function LocalIdentityBadge({ entity, forceAddress, ...props }) {
       connectedAccount={addressesEqual(address, wallet.account)}
       entity={address}
       label={(!forceAddress && label) || ''}
-      popoverAction={{
-        label: (
-          <div
-            css={`
-              display: flex;
-              align-items: center;
-            `}
-          >
-            <IconLabel
-              css={`
-                margin-right: ${1 * GU}px;
-              `}
-            />
-            {label ? 'Edit' : 'Add'} custom label
-          </div>
-        ),
-        onClick: handleClick,
-      }}
+      popoverAction={getPopoverAction()}
       popoverTitle={
-        label ? <LocalIdentityPopoverTitle label={label} /> : 'Address'
+        label ? <LocalIdentityPopoverTitle label={label} source={source} /> : 'Address'
       }
     />
   )

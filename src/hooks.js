@@ -273,11 +273,13 @@ export function useArrowKeysFocus(query, containerRef = useRef()) {
 export function useLocalIdentity(entity) {
   const { resolve, identityEvents$ } = useContext(IdentityContext)
   const [name, setName] = useState(null)
+  const [source, setSource] = useState(null)
 
   const handleResolve = useCallback(async () => {
     try {
-      const { name = null } = (await resolve(entity)) || {}
+      const { name = null, source = null } = (await resolve(entity)) || {}
       setName(name)
+      setSource(source)
     } catch (e) {
       // address does not resolve to identity
     }
@@ -312,7 +314,7 @@ export function useLocalIdentity(entity) {
     }
   }, [identityEvents$, handleResolve, entity, handleRemove])
 
-  return { name, handleResolve }
+  return { name, source, handleResolve }
 }
 
 export function useMatchMedia(query) {
