@@ -174,11 +174,11 @@ export function getClientOrgInfo() {
       const data = JSON.parse(storedOrgInfo)
       Object.entries(data).forEach(([key, value]) => {
         if(value.image) {
-          const arrayBuffer = Uint32Array.from(JSON.parse(value.image)).buffer
+          const arrayBuffer = Uint8Array.from(atob(value.image), c => c.charCodeAt(0))
           const newValue = {
             ...value,
             image: URL.createObjectURL(
-              new Blob([arrayBuffer], { type: 'image/jpeg' })
+              new Blob([arrayBuffer], { type: value.imageType })
             ),
           }
           data[key] = newValue

@@ -14,9 +14,7 @@ export const OrgInfoProvider = ({
   children,
   dao,
   fetchedData,
-  //orgInfo,
   setFetchedData,
-  //setOrgInfo,
   wrapper,
 }) => {
   const {
@@ -25,7 +23,7 @@ export const OrgInfoProvider = ({
     ipfsProviderConnectionSuccess,
   } = useOrganizationDataStore()
   const { appearance, updateClientTheme } = useClientTheme()
-  const [orgInfo, setOrgInfo] = useState()
+  const [orgInfo, setOrgInfo] = useState(CLIENT_ORG_INFO)
 
   const getThisOrg = useCallback(() => {
     if (!dao || !orgInfo) return null
@@ -49,32 +47,29 @@ export const OrgInfoProvider = ({
     if (styleCid) {
       const style = await ipfsEndpoints.dag.get(styleCid)
       if (style) {
+        data.imageType = style.imageType
         data.background = style.background
         data.theme = style.theme
       }
     }
-    //const clientData = { ...data } // images stored in local storage will differ than stored in state, thus two objects
+    const clientData = { ...data } // images stored in local storage will differ than stored in state, thus two objects
     if (logoCid) {
       const logo = await ipfsEndpoints.cat(logoCid)
       if (logo && logo.ok) {
         const arrayBuffer = await logo.arrayBuffer()
         data.image = URL.createObjectURL(
-          new Blob([arrayBuffer], { type: 'image/jpeg' })
+          new Blob([arrayBuffer], { type: data.imageType })
         )
-        /*
-        clientData.image = JSON.stringify(
-          Array.from(new Uint32Array(arrayBuffer))
-        )
-        */
+        clientData.image = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
       }
     }
 
     const newOrgInfo = {...orgInfo}
-    //const newClientOrgInfo = {...CLIENT_ORG_INFO}
+    const newClientOrgInfo = {...CLIENT_ORG_INFO}
     newOrgInfo[dao] = data
-    //newClientOrgInfo[dao] = clientData
+    newClientOrgInfo[dao] = clientData
     setOrgInfo(newOrgInfo)
-    //setClientOrgInfo(newClientOrgInfo)
+    setClientOrgInfo(newClientOrgInfo)
     setFetchedData(true)
 
     updateClientTheme(appearance, {
