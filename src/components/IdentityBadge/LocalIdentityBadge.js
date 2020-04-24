@@ -12,7 +12,6 @@ import {
 import IdentityBadgeWithNetwork from './IdentityBadgeWithNetwork'
 import LocalIdentityPopoverTitle from './LocalIdentityPopoverTitle'
 
-
 function LocalIdentityBadge({ entity, forceAddress, ...props }) {
   const address = isAddress(entity) ? entity : null
   const { onNavigateToProfile, identityEvents$ } = useContext(IdentityContext)
@@ -22,7 +21,7 @@ function LocalIdentityBadge({ entity, forceAddress, ...props }) {
   const wallet = useWallet()
 
   const handleCustomLabel = useCallback(() => {
-    if (source == 'addressBook') return
+    if (source === 'addressBook') return
     showLocalIdentityModal(address)
       .then(handleResolve)
       .then(() =>
@@ -35,9 +34,9 @@ function LocalIdentityBadge({ entity, forceAddress, ...props }) {
 
   const handleProfile = useCallback(() => {
     onNavigateToProfile(address)
-  }, [address])
+  }, [address, onNavigateToProfile])
 
-  const popoverAction = ({label, onClick}) => {
+  const popoverAction = ({ label, onClick }) => {
     return {
       label: (
         <div
@@ -59,13 +58,13 @@ function LocalIdentityBadge({ entity, forceAddress, ...props }) {
   }
 
   const getPopoverAction = () => {
-    if(source === 'addressBook') return null
-    if(source === '3box') {
+    if (source === 'addressBook') return null
+    if (source === '3box') {
       const popoverLabel = 'View profile'
-      return popoverAction({label: popoverLabel, onClick: handleProfile})
+      return popoverAction({ label: popoverLabel, onClick: handleProfile })
     }
     const popoverLabel = `${label ? 'Edit' : 'Add'} custom label`
-    return popoverAction({label: popoverLabel, onClick: handleCustomLabel})
+    return popoverAction({ label: popoverLabel, onClick: handleCustomLabel })
   }
 
   if (address === null) {
@@ -80,7 +79,11 @@ function LocalIdentityBadge({ entity, forceAddress, ...props }) {
       label={(!forceAddress && label) || ''}
       popoverAction={getPopoverAction()}
       popoverTitle={
-        label ? <LocalIdentityPopoverTitle label={label} source={source} /> : 'Address'
+        label ? (
+          <LocalIdentityPopoverTitle label={label} source={source} />
+        ) : (
+          'Address'
+        )
       }
     />
   )

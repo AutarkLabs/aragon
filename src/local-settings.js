@@ -173,8 +173,10 @@ export function getClientOrgInfo() {
     try {
       const data = JSON.parse(storedOrgInfo)
       Object.entries(data).forEach(([key, value]) => {
-        if(value.image) {
-          const arrayBuffer = Uint8Array.from(atob(value.image), c => c.charCodeAt(0))
+        if (value.image) {
+          const arrayBuffer = Uint8Array.from(atob(value.image), c =>
+            c.charCodeAt(0)
+          )
           const newValue = {
             ...value,
             image: URL.createObjectURL(

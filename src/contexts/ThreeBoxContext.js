@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { AragonType } from '../prop-types'
 import Box from '3box'
 import { usePermissionsByRole } from './PermissionsContext'
-import { useAppState, useAragonApi } from './AppContext'
+import { useAragonApi } from './AppContext'
 import { useWallet } from '../wallet'
 import { ipfsDefaultConf } from '../environment'
 

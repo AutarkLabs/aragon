@@ -61,11 +61,7 @@ function AccountModule({ compact }) {
             align-items: center;
           `}
         >
-          {isConnected ? (
-            <ConnectedMode />
-          ) : (
-            <NotConnected compact={compact} />
-          )}
+          {isConnected ? <ConnectedMode /> : <NotConnected compact={compact} />}
         </AnimatedDiv>
       )}
     </Spring>
@@ -88,7 +84,7 @@ function ConnectedMode() {
   const containerRef = useRef()
 
   const { walletNetworkName, hasNetworkMismatch } = useNetworkConnectionData()
-  
+
   return (
     <div
       ref={containerRef}

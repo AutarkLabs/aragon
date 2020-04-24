@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import { Tag, GU } from '@aragon/ui'
 
-const getTag = (source) => {
+const getTag = source => {
   if (source === '3box') return '3Box'
   if (source === 'addressBook') return 'Address Book'
   return 'Custom Label'
@@ -27,6 +27,7 @@ const LocalIdentityPopoverTitle = ({ label, source }) => {
 
 LocalIdentityPopoverTitle.propTypes = {
   label: PropTypes.string.isRequired,
+  source: PropTypes.string.isRequired,
 }
 
 const WrapTitle = styled.div`
