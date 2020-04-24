@@ -32,6 +32,7 @@ const { div: AnimDiv } = animated
 
 const APP_APPS_CENTER = staticApps.get('apps').app
 const APP_CONSOLE = staticApps.get('console').app
+const APP_FORUM = staticApps.get('forum').app
 const APP_HOME = staticApps.get('home').app
 const APP_ORGANIZATION = staticApps.get('organization').app
 const APP_PERMISSIONS = staticApps.get('permissions').app
@@ -82,7 +83,7 @@ function MenuPanel({
   )
 
   const showConsole = consoleVisible || activeInstanceId === 'console'
-  const menuApps = [APP_HOME, appGroups]
+  const menuApps = [APP_HOME, APP_FORUM, appGroups]
   const systemApps = [
     APP_PERMISSIONS,
     APP_APPS_CENTER,

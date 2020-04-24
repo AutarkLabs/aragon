@@ -26,6 +26,7 @@ import {
 import SandboxedWorker from './worker/SandboxedWorker'
 import WorkerSubscriptionPool from './worker/WorkerSubscriptionPool'
 
+const BLACKLIST = ['Forum']
 const POLL_DELAY_CONNECTIVITY = 2000
 
 const applyAppOverrides = apps =>
@@ -192,6 +193,10 @@ const subscribe = (
       // a background script defined
       applyAppOverrides(apps)
         .filter(app => app.script)
+        .filter(app => {
+          const index = BLACKLIST.findIndex(name => name === app.name)
+          return index === -1
+        })
         .filter(
           ({ proxyAddress, updated }) =>
             updated || !workerSubscriptionPool.hasWorker(proxyAddress)

@@ -3,7 +3,14 @@ import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import memoize from 'lodash.memoize'
 import { Profile } from '@openworklabs/aragon-profile'
-import { AppCenter, Console, Home, Organization, Permissions } from './apps'
+import {
+  AppCenter,
+  Console,
+  Forum,
+  Home,
+  Organization,
+  Permissions,
+} from './apps'
 import App404 from './components/App404/App404'
 import AppIFrame from './components/App/AppIFrame'
 import AppInternal from './components/App/AppInternal'
@@ -160,9 +167,7 @@ class Wrapper extends React.PureComponent {
       ? historyPush(
           `${getAppPath({ dao: locator.dao, instanceId })}/${account}`
         )
-      : historyPush(
-          getAppPath({ dao: locator.dao, instanceId, instancePath })
-        )
+      : historyPush(getAppPath({ dao: locator.dao, instanceId, instancePath }))
   }
 
   handleAppIFrameRef = appIFrame => {
@@ -348,6 +353,14 @@ class Wrapper extends React.PureComponent {
 
     const appsLoading = appsStatus === APPS_STATUS_LOADING
     const reposLoading = appsLoading || Boolean(apps.length && !repos.length)
+
+    if (instanceId === 'forum') {
+      return (
+        <AppInternal>
+          <Forum />
+        </AppInternal>
+      )
+    }
 
     if (instanceId === 'home') {
       return (

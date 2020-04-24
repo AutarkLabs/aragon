@@ -20,12 +20,14 @@ import { getWeb3 } from './web3-utils'
 import { enableWallet, useWallet } from './wallet'
 import { log } from './utils'
 import { ActivityProvider } from './contexts/ActivityContext'
+import { AppProvider } from './contexts/AppContext'
 import { FavoriteDaosProvider } from './contexts/FavoriteDaosContext'
 import { PermissionsProvider } from './contexts/PermissionsContext'
 import { IPFSStorageProvider } from './contexts/IpfsStorageContext'
 import { OrgInfoProvider } from './contexts/OrgInfoContext'
 import { IdentityProvider } from './components/IdentityManager/IdentityManager'
 import { LocalIdentityModalProvider } from './components/LocalIdentityModal/LocalIdentityModalManager'
+import { ThreeBoxProvider } from './contexts/ThreeBoxContext'
 import LocalIdentityModal from './components/LocalIdentityModal/LocalIdentityModal'
 import HelpScoutBeacon from './components/HelpScoutBeacon/HelpScoutBeacon'
 import GlobalPreferences from './components/GlobalPreferences/GlobalPreferences'
@@ -120,8 +122,8 @@ class App extends React.Component {
     }
   }
 
-  setFetchedData = bool => this.setState({ fetchedData: bool})
-  //setOrgInfo = data => this.setState({ orgInfo: data})
+  setFetchedData = bool => this.setState({ fetchedData: bool })
+  // setOrgInfo = data => this.setState({ orgInfo: data})
 
   // Handle URL changes
   handleHistoryChange = ({ pathname, search, state = {} }) => {
@@ -150,7 +152,10 @@ class App extends React.Component {
     const { locator: prevLocator } = this.state
 
     // New DAO: need to reinit the wrapper
-    if (locator.dao && (Object.keys(prevLocator).length === 0 || locator.dao !== prevLocator.dao)) {
+    if (
+      locator.dao &&
+      (Object.keys(prevLocator).length === 0 || locator.dao !== prevLocator.dao)
+    ) {
       this.updateDao(locator.dao)
     }
 
@@ -364,7 +369,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { theme } = this.props
+    const { theme, walletAccount } = this.props
     const {
       apps,
       appIdentifiers,
@@ -435,8 +440,8 @@ class App extends React.Component {
                   dao={daoAddress.address}
                   fetchedData={fetchedData}
                   setFetchedData={this.setFetchedData}
-                  //orgInfo={orgInfo}
-                  //setOrgInfo={this.setOrgInfo}
+                  // orgInfo={orgInfo}
+                  // setOrgInfo={this.setOrgInfo}
                   wrapper={wrapper}
                 >
                   <CustomToast>
@@ -466,32 +471,55 @@ class App extends React.Component {
                               apps={appsWithIdentifiers}
                               permissions={permissions}
                             >
-                              <div css="position: relative; z-index: 0">
-                                <Wrapper
-                                  visible={mode === APP_MODE_ORG}
-                                  apps={appsWithIdentifiers}
-                                  appsStatus={appsStatus}
-                                  canUpgradeOrg={canUpgradeOrg}
-                                  connected={connected}
-                                  daoAddress={daoAddress}
-                                  daoStatus={daoStatus}
-                                  historyBack={this.historyBack}
-                                  historyPush={this.historyPush}
-                                  locator={locator}
-                                  onRequestAppsReload={
-                                    this.handleRequestAppsReload
-                                  }
-                                  onRequestEnable={enableWallet}
+                              <AppProvider
+                                apps={appsWithIdentifiers}
+                                handleIdentityResolve={
+                                  this.handleIdentityResolve
+                                }
+                                handleOpenLocalIdentityModal={
+                                  this.handleOpenLocalIdentityModal
+                                }
+                                historyPush={this.historyPush}
+                                locator={locator}
+                                network={network}
+                                walletAccount={walletAccount}
+                                web3={web3}
+                                wrapper={wrapper}
+                              >
+                                <ThreeBoxProvider
+                                  dao={daoAddress.address}
                                   onSignatures={this.onSignatures}
-                                  openPreferences={this.openPreferences}
-                                  permissionsLoading={permissionsLoading}
-                                  repos={repos}
-                                  signatureBag={signatureBag}
-                                  transactionBag={transactionBag}
                                   web3={web3}
                                   wrapper={wrapper}
-                                />
-                              </div>
+                                >
+                                  <div css="position: relative; z-index: 0">
+                                    <Wrapper
+                                      visible={mode === APP_MODE_ORG}
+                                      apps={appsWithIdentifiers}
+                                      appsStatus={appsStatus}
+                                      canUpgradeOrg={canUpgradeOrg}
+                                      connected={connected}
+                                      daoAddress={daoAddress}
+                                      daoStatus={daoStatus}
+                                      historyBack={this.historyBack}
+                                      historyPush={this.historyPush}
+                                      locator={locator}
+                                      onRequestAppsReload={
+                                        this.handleRequestAppsReload
+                                      }
+                                      onRequestEnable={enableWallet}
+                                      onSignatures={this.onSignatures}
+                                      openPreferences={this.openPreferences}
+                                      permissionsLoading={permissionsLoading}
+                                      repos={repos}
+                                      signatureBag={signatureBag}
+                                      transactionBag={transactionBag}
+                                      web3={web3}
+                                      wrapper={wrapper}
+                                    />
+                                  </div>
+                                </ThreeBoxProvider>
+                              </AppProvider>
                             </PermissionsProvider>
 
                             <Onboarding

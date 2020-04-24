@@ -6,6 +6,7 @@ import { appIconUrl, legacyAppIconUrl } from '../../utils'
 import iconSvgAcl from './assets/app-acl.svg'
 import iconSvgApps from './assets/app-apps.svg'
 import iconSvgDefault from './assets/app-default.svg'
+import iconSvgForum from './assets/app-forum.svg'
 import iconSvgHome from './assets/app-home.svg'
 import iconSvgKernel from './assets/app-kernel.svg'
 import iconSvgPermissions from './assets/app-permissions.svg'
@@ -22,6 +23,7 @@ const DISPLAY_FALLBACK_DELAY = 50
 const KNOWN_ICONS = new Map([
   ['apps', iconSvgApps],
   ['console', iconSvgConsole],
+  ['forum', iconSvgForum],
   ['home', iconSvgHome],
   ['organization', iconSvgSettings],
   ['permissions', iconSvgPermissions],
@@ -36,6 +38,14 @@ const KNOWN_ICONS = new Map([
   [
     '0xe3262375f45a6e2026b7e7b18c2b807434f2508fe1a2a3dfb493c7df8f4aad6a',
     iconSvgAcl,
+  ],
+  [
+    '0xf8c9b8210902c14e71192ea564edd090c1659cbef1384e362fb508d396d72a38', // discussions.aragonpm.eth
+    iconSvgForum,
+  ],
+  [
+    '0x36ed2b69c7261556794cbbfdfff77470091d1f97a13064941ccb6a2c578ecc3d', // discussions-experimental.open.aragonpm.eth
+    iconSvgForum,
   ],
   ['profile', iconSvgRegistry],
 ])
