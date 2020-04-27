@@ -160,9 +160,7 @@ class Wrapper extends React.PureComponent {
       ? historyPush(
           `${getAppPath({ dao: locator.dao, instanceId })}/${account}`
         )
-      : historyPush(
-          getAppPath({ dao: locator.dao, instanceId, instancePath })
-        )
+      : historyPush(getAppPath({ dao: locator.dao, instanceId, instancePath }))
   }
 
   handleAppIFrameRef = appIFrame => {

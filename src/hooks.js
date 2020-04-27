@@ -285,7 +285,7 @@ export function useLocalIdentity(entity) {
   const handleResolve = useCallback(async () => {
     try {
       const { name = null, source = null, image = null } =
-          (await resolve(entity)) || {}
+        (await resolve(entity)) || {}
       setLoading(false)
       setName(name)
       setSource(source)

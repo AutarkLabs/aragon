@@ -32,7 +32,7 @@ const initialStorageContextValue = {
 const reducer = (state, action) => {
   switch (action.type) {
     case INITIALIZE:
-     return initialStorageContextValue
+      return initialStorageContextValue
     case NO_STORAGE_APP_INSTALLED:
       return {
         ...initialStorageContextValue,

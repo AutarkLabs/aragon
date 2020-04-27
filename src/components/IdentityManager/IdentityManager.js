@@ -19,12 +19,20 @@ const IdentityContext = React.createContext({
 })
 
 const IdentityProvider = ({ locator, onResolve, children }) => {
-  const onNavigateToProfile = useCallback((address) => {
-    window.location = `/#${getAppPath({dao : locator.dao, instanceId: 'profile'})}${address}`
-  }, [locator])
+  const onNavigateToProfile = useCallback(
+    address => {
+      window.location = `/#${getAppPath({
+        dao: locator.dao,
+        instanceId: 'profile',
+      })}${address}`
+    },
+    [locator]
+  )
 
   return (
-    <IdentityContext.Provider value={{ resolve: onResolve, onNavigateToProfile, identityEvents$ }}>
+    <IdentityContext.Provider
+      value={{ resolve: onResolve, onNavigateToProfile, identityEvents$ }}
+    >
       {children}
     </IdentityContext.Provider>
   )

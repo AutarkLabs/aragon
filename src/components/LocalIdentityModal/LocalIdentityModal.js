@@ -123,12 +123,12 @@ LocalModal.propTypes = {
 }
 
 const Error = styled.div`
-  color: ${({theme}) => theme.error};
+  color: ${({ theme }) => theme.error};
   text-transform: initial;
 `
 
 const Wrap = styled.div`
-  background: ${({theme}) => theme.surface};
+  background: ${({ theme }) => theme.surface};
   max-width: calc(100vw - 32px);
 
   ${breakpoint(

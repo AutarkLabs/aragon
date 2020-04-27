@@ -120,8 +120,8 @@ class App extends React.Component {
     }
   }
 
-  setFetchedData = bool => this.setState({ fetchedData: bool})
-  //setOrgInfo = data => this.setState({ orgInfo: data})
+  setFetchedData = bool => this.setState({ fetchedData: bool })
+  // setOrgInfo = data => this.setState({ orgInfo: data})
 
   // Handle URL changes
   handleHistoryChange = ({ pathname, search, state = {} }) => {
@@ -150,7 +150,10 @@ class App extends React.Component {
     const { locator: prevLocator } = this.state
 
     // New DAO: need to reinit the wrapper
-    if (locator.dao && (Object.keys(prevLocator).length === 0 || locator.dao !== prevLocator.dao)) {
+    if (
+      locator.dao &&
+      (Object.keys(prevLocator).length === 0 || locator.dao !== prevLocator.dao)
+    ) {
       this.updateDao(locator.dao)
     }
 
@@ -435,8 +438,8 @@ class App extends React.Component {
                   dao={daoAddress.address}
                   fetchedData={fetchedData}
                   setFetchedData={this.setFetchedData}
-                  //orgInfo={orgInfo}
-                  //setOrgInfo={this.setOrgInfo}
+                  // orgInfo={orgInfo}
+                  // setOrgInfo={this.setOrgInfo}
                   wrapper={wrapper}
                 >
                   <CustomToast>
