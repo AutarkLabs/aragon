@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react'
-import { useAragonApi, usePathHelpers } from '../../contexts/AppContext'
-import { Button, GU, Header, IconPlus, SyncIndicator } from '@aragon/ui'
+import { AppStateProvider } from './context/AppStateContext'
+import { useAppState, usePathHelpers } from './hooks'
+import {
+  Bar,
+  BackButton,
+  Button,
+  GU,
+  Header,
+  IconPlus,
+  SyncIndicator
+} from '@aragon/ui'
 import { Empty } from './components/Card'
 import { Threads, ThreadDetail } from './components/Content'
 import { ThreadModal } from './components/Modal'
 import { use3Box } from '../../hooks'
 
 const Forum = () => {
-  const {
-    appState: { threads = [], isSyncing },
-  } = useAragonApi()
+  const { threads = [], isSyncing } = useAppState()
   const {
     activateThread,
     activeThreadAddress,
@@ -82,7 +89,6 @@ const Forum = () => {
                 />
               )
             }
-            onBack={verifiedThread ? () => handleBack() : null}
             css={`
               @media only screen and (max-width: 600px) {
                 padding: ${2 * GU}px 0;
@@ -90,7 +96,10 @@ const Forum = () => {
             `}
           />
           {verifiedThread ? (
-            <ThreadDetail thread={verifiedThread} />
+            <>
+              <Bar primary={<BackButton onClick={() => handleBack()} />} />
+              <ThreadDetail thread={verifiedThread} />
+            </>
           ) : (
             <Threads threads={processedThreads} />
           )}
@@ -105,4 +114,10 @@ const Forum = () => {
   )
 }
 
-export default Forum
+const App = (props) => (
+  <AppStateProvider {...props} >
+    <Forum />
+  </AppStateProvider>
+)
+
+export default App

@@ -47,7 +47,6 @@ const Editor = ({ editor, initialValue, onChange, setEditor, ...props }) => {
 
   useEffect(() => {
     if (editor) {
-      editor.focus()
       // move cursor to the end
       editor.setCursor(editor.lineCount(), 0)
     }
@@ -68,14 +67,18 @@ const Editor = ({ editor, initialValue, onChange, setEditor, ...props }) => {
           border: 1px solid ${theme.border};
           border-radius: ${RADIUS}px;
           color: ${theme.surfaceContent};
+
           font-family: aragon-ui, sans-serif;
           height: ${22 * GU}px;
         }
         .CodeMirror-cursor {
-          border-left: 1px solid ${theme.primaryContent};
+          border-left: 1px solid ${theme.surfaceContent};
         }
         .CodeMirror-selected {
           background: #0294b3; /* not aragon-ui definition */
+        }
+        .CodeMirror-focused {
+          border-color: ${theme.accent};
         }
         .CodeMirror-focused .CodeMirror-selected {
           background: ${theme.selected};

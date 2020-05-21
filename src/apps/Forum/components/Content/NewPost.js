@@ -3,20 +3,14 @@ import { Button, Card, GU, textStyle, useTheme } from '@aragon/ui'
 import Markdown from '../Markdown/Markdown'
 import { useWallet } from '../../../../wallet'
 import { use3Box } from '../../../../hooks'
+import LocalIdentityBadge from '../../../../components/IdentityBadge/LocalIdentityBadge'
 
 const NewPost = () => {
   const theme = useTheme()
   const [description, setDescription] = useState('')
   const [userProfile, setUserProfile] = useState()
   const { account } = useWallet()
-  const { getProfile, newPost } = use3Box()
-
-  useEffect(() => {
-    const getUserProfile = async () => {
-      setUserProfile(await getProfile(account))
-    }
-    getUserProfile()
-  }, [getProfile, account])
+  const { newPost } = use3Box()
 
   const submitNewPost = async () => {
     await newPost(description)
@@ -40,33 +34,10 @@ const NewPost = () => {
         {userProfile && (
           <div
             css={`
-              display: flex;
               margin-bottom: ${GU}px;
             `}
           >
-            <div
-              css={`
-                margin-right: ${GU}px;
-              `}
-            >
-              <img
-                src={userProfile.image}
-                width={3 * GU}
-                height={3 * GU}
-                css={`
-                  border-radius: 50%;
-                `}
-              />
-            </div>
-            <div
-              css={`
-                ${textStyle('body2')};
-                font-weight: 500;
-                color: ${theme.disabledIcon};
-              `}
-            >
-              {userProfile.name}
-            </div>
+            <LocalIdentityBadge entity={account} />
           </div>
         )}
         <div>

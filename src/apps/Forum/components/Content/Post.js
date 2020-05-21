@@ -1,14 +1,23 @@
 import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
-import { Button, Card, GU, Link, textStyle, useTheme } from '@aragon/ui'
+import {
+  ButtonBase,
+  Button,
+  Card,
+  GU,
+  IconEdit,
+  IconTrash,
+  textStyle,
+  useTheme
+} from '@aragon/ui'
 import { formatDistance } from 'date-fns'
 import Markdown from '../Markdown/Markdown'
 import Preview from '../Markdown/Preview'
 import { use3Box } from '../../../../hooks'
-import { EditIcon, TrashIcon } from '../Icon'
 import { DeleteModal } from '../Modal'
+import LocalIdentityBadge from '../../../../components/IdentityBadge/LocalIdentityBadge'
 
-const Post = ({ author, image, name, creationDate, message, postId }) => {
+const Post = ({ author, address, creationDate, message, postId }) => {
   const theme = useTheme()
   const [editing, setEditing] = useState(false)
   const [newMessage, setNewMessage] = useState(message)
@@ -72,38 +81,10 @@ const Post = ({ author, image, name, creationDate, message, postId }) => {
             css={`
               display: flex;
               justify-content: space-between;
+              margin-bottom: ${GU}px;
             `}
           >
-            <div
-              css={`
-                display: flex;
-                margin-bottom: ${GU}px;
-              `}
-            >
-              <div
-                css={`
-                  margin-right: ${GU}px;
-                `}
-              >
-                <img
-                  src={image}
-                  width={3 * GU}
-                  height={3 * GU}
-                  css={`
-                    border-radius: 50%;
-                  `}
-                />
-              </div>
-              <div
-                css={`
-                  ${textStyle('body2')};
-                  font-weight: 500;
-                  color: ${theme.disabledIcon};
-                `}
-              >
-                {name}
-              </div>
-            </div>
+            <LocalIdentityBadge entity={address} />
             {!editing && (
               <div
                 css={`
@@ -173,14 +154,14 @@ const Post = ({ author, image, name, creationDate, message, postId }) => {
                       margin-right: ${2 * GU}px;
                     `}
                   >
-                    <Link onClick={startEdit}>
-                      <EditIcon />
-                    </Link>
+                    <ButtonBase onClick={startEdit}>
+                      <IconEdit size='medium' />
+                    </ButtonBase>
                   </div>
                   <div>
-                    <Link onClick={startDelete}>
-                      <TrashIcon />
-                    </Link>
+                    <ButtonBase onClick={startDelete}>
+                      <IconTrash size='medium' />
+                    </ButtonBase>
                   </div>
                 </>
               )}

@@ -1,9 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import styled, { keyframes } from 'styled-components'
-import { useTheme } from '@aragon/ui'
+import { EthIdenticon, IconUser, GU, useTheme } from '@aragon/ui'
 
-const ProfilePic = ({ size, imgSrc, loading }) => {
+const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
+
+const ProfilePic = ({ size, imgSrc, account, loading }) => {
   const theme = useTheme()
   if (loading) {
     return (
@@ -19,22 +21,28 @@ const ProfilePic = ({ size, imgSrc, loading }) => {
       </div>
     )
   }
+  if (imgSrc) {
+    return (
+      <img
+        src={imgSrc}
+        alt="Profile picture"
+        css={`
+          width: ${size}px;
+          height: ${size}px;
+          border-radius: 50%;
+        `}
+      />
+    )
+  }
   return (
-    <img
-      src={imgSrc}
-      alt="Profile picture"
-      css={`
-        width: ${size}px;
-        height: ${size}px;
-        border-radius: 50%;
-      `}
-    />
+    <EthIdenticon address={account || EMPTY_ADDRESS} scale={size / (3 * GU)} radius={size / 2} />
   )
 }
 
 ProfilePic.propTypes = {
   size: PropTypes.number.isRequired,
   imgSrc: PropTypes.string,
+  account: PropTypes.string,
   loading: PropTypes.bool.isRequired,
 }
 

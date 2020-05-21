@@ -20,7 +20,6 @@ import { getWeb3 } from './web3-utils'
 import { enableWallet, useWallet } from './wallet'
 import { log } from './utils'
 import { ActivityProvider } from './contexts/ActivityContext'
-import { AppProvider } from './contexts/AppContext'
 import { FavoriteDaosProvider } from './contexts/FavoriteDaosContext'
 import { PermissionsProvider } from './contexts/PermissionsContext'
 import { IPFSStorageProvider } from './contexts/IpfsStorageContext'
@@ -471,55 +470,40 @@ class App extends React.Component {
                               apps={appsWithIdentifiers}
                               permissions={permissions}
                             >
-                              <AppProvider
+                              <ThreeBoxProvider
                                 apps={appsWithIdentifiers}
-                                handleIdentityResolve={
-                                  this.handleIdentityResolve
-                                }
-                                handleOpenLocalIdentityModal={
-                                  this.handleOpenLocalIdentityModal
-                                }
-                                historyPush={this.historyPush}
-                                locator={locator}
-                                network={network}
-                                walletAccount={walletAccount}
+                                dao={daoAddress.address}
+                                onSignatures={this.onSignatures}
                                 web3={web3}
                                 wrapper={wrapper}
                               >
-                                <ThreeBoxProvider
-                                  dao={daoAddress.address}
-                                  onSignatures={this.onSignatures}
-                                  web3={web3}
-                                  wrapper={wrapper}
-                                >
-                                  <div css="position: relative; z-index: 0">
-                                    <Wrapper
-                                      visible={mode === APP_MODE_ORG}
-                                      apps={appsWithIdentifiers}
-                                      appsStatus={appsStatus}
-                                      canUpgradeOrg={canUpgradeOrg}
-                                      connected={connected}
-                                      daoAddress={daoAddress}
-                                      daoStatus={daoStatus}
-                                      historyBack={this.historyBack}
-                                      historyPush={this.historyPush}
-                                      locator={locator}
-                                      onRequestAppsReload={
-                                        this.handleRequestAppsReload
-                                      }
-                                      onRequestEnable={enableWallet}
-                                      onSignatures={this.onSignatures}
-                                      openPreferences={this.openPreferences}
-                                      permissionsLoading={permissionsLoading}
-                                      repos={repos}
-                                      signatureBag={signatureBag}
-                                      transactionBag={transactionBag}
-                                      web3={web3}
-                                      wrapper={wrapper}
-                                    />
-                                  </div>
-                                </ThreeBoxProvider>
-                              </AppProvider>
+                                <div css="position: relative; z-index: 0">
+                                  <Wrapper
+                                    visible={mode === APP_MODE_ORG}
+                                    apps={appsWithIdentifiers}
+                                    appsStatus={appsStatus}
+                                    canUpgradeOrg={canUpgradeOrg}
+                                    connected={connected}
+                                    daoAddress={daoAddress}
+                                    daoStatus={daoStatus}
+                                    historyBack={this.historyBack}
+                                    historyPush={this.historyPush}
+                                    locator={locator}
+                                    onRequestAppsReload={
+                                      this.handleRequestAppsReload
+                                    }
+                                    onRequestEnable={enableWallet}
+                                    onSignatures={this.onSignatures}
+                                    openPreferences={this.openPreferences}
+                                    permissionsLoading={permissionsLoading}
+                                    repos={repos}
+                                    signatureBag={signatureBag}
+                                    transactionBag={transactionBag}
+                                    web3={web3}
+                                    wrapper={wrapper}
+                                  />
+                                </div>
+                              </ThreeBoxProvider>
                             </PermissionsProvider>
 
                             <Onboarding

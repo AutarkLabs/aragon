@@ -6,20 +6,21 @@ import {
   // IconActivity,
   // IconComment,
   IconTime,
-  IconWrite,
+  IconChat,
   LoadingRing,
   textStyle,
 } from '@aragon/ui'
 import { formatDistance } from 'date-fns'
 import { use3Box } from '../../../../hooks'
-import { usePathHelpers } from '../../../../contexts/AppContext'
+import { usePathHelpers } from '../../hooks'
 import { ProfilePic } from '.'
 
 const ThreadInfo = ({ address, threadDate, threadAuthor }) => {
-  const { getPosts, getProfile } = use3Box()
+  const { getAddress, getPosts, getProfile } = use3Box()
   const [postTotal, setPostTotal] = useState('')
   const [postTime, setPostTime] = useState('')
   const [postAuthor, setPostAuthor] = useState()
+  const [postAuthorAddress, setPostAuthorAddress] = useState()
   const [postAuthorPic, setPostAuthorPic] = useState()
   const [postLoading, setPostLoading] = useState(true)
   const [picLoading, setPicLoading] = useState(true)
@@ -38,8 +39,14 @@ const ThreadInfo = ({ address, threadDate, threadAuthor }) => {
     if (postAuthor && !initPic) {
       setInitPic(true)
       getProfile(postAuthor)
-        .then(({ image }) => {
-          setPostAuthorPic(image)
+        .then((profile) => {
+          const { image, proof_did } = profile
+          if (!image) {
+            const authorAddress = getAddress(proof_did)
+            setPostAuthorAddress(authorAddress)
+          } else {
+            setPostAuthorPic(image)
+          }
           setPicLoading(false)
           return null
         })
@@ -84,6 +91,7 @@ const ThreadInfo = ({ address, threadDate, threadAuthor }) => {
         display: flex;
         align-items: center;
         ${textStyle('body2')};
+        line-height: 1.5;
         > span {
           white-space: nowrap;
           margin: 0 ${2 * GU}px 0 ${GU}px;
@@ -91,11 +99,16 @@ const ThreadInfo = ({ address, threadDate, threadAuthor }) => {
         }
       `}
     >
-      <IconWrite size="small" />
+      <IconChat size="medium" />
       <span>{postLoading ? <LoadingRing /> : postTotal}</span>
-      <IconTime size="small" />
-      <span>{postLoading ? <LoadingRing /> : postTime} ago</span>
-      <ProfilePic imgSrc={postAuthorPic} size={4 * GU} loading={picLoading} />
+      <IconTime size="medium" />
+      <span>{postLoading ? <LoadingRing /> : `${postTime} ago`}</span>
+      <ProfilePic
+        imgSrc={postAuthorPic}
+        account={postAuthorAddress}
+        size={4 * GU}
+        loading={picLoading}
+      />
     </div>
   )
 }

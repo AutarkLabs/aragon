@@ -348,6 +348,7 @@ class Wrapper extends React.PureComponent {
       onSignatures,
       permissionsLoading,
       repos,
+      web3,
       wrapper,
     } = this.props
 
@@ -357,7 +358,13 @@ class Wrapper extends React.PureComponent {
     if (instanceId === 'forum') {
       return (
         <AppInternal>
-          <Forum />
+          <Forum
+            apps={apps}
+            locator={locator}
+            onPathRequest={this.handlePathRequest}
+            web3={web3}
+            wrapper={wrapper}
+          />
         </AppInternal>
       )
     }
@@ -439,7 +446,7 @@ class Wrapper extends React.PureComponent {
             enableWallet={onRequestEnable}
             onSignatures={onSignatures}
             parts={parts}
-            web3Provider={window.web3}
+            web3Provider={web3}
           />
         </AppInternal>
       )

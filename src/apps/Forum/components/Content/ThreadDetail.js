@@ -3,49 +3,40 @@ import PropTypes from 'prop-types'
 import { use3Box } from '../../../../hooks'
 import {
   Button,
+  ButtonBase,
   Card,
   GU,
-  IconComment,
-  Link,
+  IconChat,
+  IconEdit,
+  IconTrash,
   Modal,
   textStyle,
   useTheme,
 } from '@aragon/ui'
 import { formatDistance } from 'date-fns'
-import EditIcon from '../Icon/EditIcon'
-import TrashIcon from '../Icon/TrashIcon'
 import Markdown from '../Markdown/Markdown'
 import Preview from '../Markdown/Preview'
 import LoadingAnimation from '../Modal/LoadingAnimation'
 import { useWallet } from '../../../../wallet'
-import { useAragonApi, usePathHelpers } from '../../../../contexts/AppContext'
+import { useAragonApi, usePathHelpers } from '../../hooks'
 import { ipfsAdd } from '../../../../ipfs'
 import { NewPost, Posts } from './'
+import LocalIdentityBadge from '../../../../components/IdentityBadge/LocalIdentityBadge'
 
 const ThreadDetail = ({ thread }) => {
   const {
     activePosts,
     deactivateThread,
-    getProfile,
     loadingThread,
     userCanPost,
   } = use3Box()
-  const [threadDescription, setThreadDescription] = useState('')
+  const [threadDescription, setThreadDescription] = useState(thread.description)
   const [editingThread, setEditingThread] = useState(false)
   const [showDeleteThreadModal, setShowDeleteThreadModal] = useState(false)
-  const [threadProfile, setThreadProfile] = useState()
   const { account } = useWallet()
   const { api } = useAragonApi()
   const { requestPath } = usePathHelpers()
   const theme = useTheme()
-
-  useEffect(() => {
-    const getThreadProfile = async () => {
-      setThreadProfile(await getProfile(thread.author))
-    }
-    getThreadProfile()
-    setThreadDescription(thread.description)
-  }, [getProfile, thread])
 
   const startEditThread = () => {
     setEditingThread(true)
@@ -98,40 +89,10 @@ const ThreadDetail = ({ thread }) => {
             css={`
               display: flex;
               justify-content: space-between;
+              margin-bottom: ${GU}px;
             `}
           >
-            {threadProfile && (
-              <div
-                css={`
-                  display: flex;
-                  margin-bottom: ${GU}px;
-                `}
-              >
-                <div
-                  css={`
-                    margin-right: ${GU}px;
-                  `}
-                >
-                  <img
-                    src={threadProfile.image}
-                    width={3 * GU}
-                    height={3 * GU}
-                    css={`
-                      border-radius: 50%;
-                    `}
-                  />
-                </div>
-                <div
-                  css={`
-                    ${textStyle('body2')};
-                    font-weight: 500;
-                    color: ${theme.disabledIcon};
-                  `}
-                >
-                  {threadProfile.name}
-                </div>
-              </div>
-            )}
+            <LocalIdentityBadge entity={thread.author} />
             {!editingThread && (
               <div
                 css={`
@@ -196,11 +157,14 @@ const ThreadDetail = ({ thread }) => {
                 css={`
                   display: flex;
                   justify-content: space-between;
+                  align-items: center;
                 `}
               >
                 <div
                   css={`
                     display: flex;
+                    align-items: center;
+                    line-height: 1;
                   `}
                 >
                   <div
@@ -208,7 +172,7 @@ const ThreadDetail = ({ thread }) => {
                       margin-right: ${GU}px;
                     `}
                   >
-                    <IconComment size="tiny" />
+                    <IconChat />
                   </div>
                   <div
                     css={`
@@ -231,22 +195,22 @@ const ThreadDetail = ({ thread }) => {
                         margin-right: ${2 * GU}px;
                       `}
                     >
-                      <Link
+                      <ButtonBase
                         onClick={() => {
                           startEditThread()
                         }}
                       >
-                        <EditIcon />
-                      </Link>
+                        <IconEdit />
+                      </ButtonBase>
                     </div>
                     <div>
-                      <Link
+                      <ButtonBase
                         onClick={() => {
                           startDeleteThread()
                         }}
                       >
-                        <TrashIcon />
-                      </Link>
+                        <IconTrash />
+                      </ButtonBase>
                     </div>
                   </div>
                 )}

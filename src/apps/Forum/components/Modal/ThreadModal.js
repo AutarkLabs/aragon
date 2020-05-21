@@ -5,7 +5,7 @@ import { use3Box } from '../../../../hooks'
 import Markdown from '../Markdown/Markdown'
 import LoadingAnimation from './LoadingAnimation'
 import { ipfsAdd } from '../../../../ipfs'
-import { useAragonApi } from '../../../../contexts/AppContext'
+import { useAragonApi } from '../../hooks'
 import { useWallet } from '../../../../wallet'
 
 const ThreadModal = ({ visible, closeModal }) => {

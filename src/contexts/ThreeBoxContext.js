@@ -3,13 +3,17 @@ import PropTypes from 'prop-types'
 import { AragonType } from '../prop-types'
 import Box from '3box'
 import { usePermissionsByRole } from './PermissionsContext'
-import { useAragonApi } from './AppContext'
 import { useWallet } from '../wallet'
-import { ipfsDefaultConf } from '../environment'
+import { appIds, ipfsDefaultConf } from '../environment'
+
+const getCacheKey = (address, location) => {
+  return `${address}.${location}`
+}
 
 export const ThreeBoxContext = createContext({})
 
 export const ThreeBoxProvider = ({
+  apps,
   children,
   dao,
   onSignatures,
@@ -17,27 +21,26 @@ export const ThreeBoxProvider = ({
   wrapper,
 }) => {
   const permissions = usePermissionsByRole()
-  // const { holders } = useAppState('tokens')
-  // const { holders } = useAppState()
-  const holders = []
-  // console.log('appstate', useAppState())
-  const {
-    api: { currentApp },
-  } = useAragonApi('forum')
   const account = useWallet()
+  const [initialized, setInitialized] = useState(false)
+  const [installedApps, setInstalledApps] = useState(apps)
   const [loadingBox, setLoadingBox] = useState(false)
   const [loadingSpace, setLoadingSpace] = useState(false)
   const [loadingThread, setLoadingThread] = useState(false)
   const [box, setBox] = useState(null)
   const [space, setSpace] = useState(null)
+  const [activeAccount, setActiveAccount] = useState(account.account)
   const [activeThread, setActiveThread] = useState(null)
   const [activeThreadAddress, setActiveThreadAddress] = useState(null)
   const [activeThreadName, setActiveThreadName] = useState(null)
   const [activePosts, setActivePosts] = useState([])
   const [members, setMembers] = useState([])
   const [memberProofs, setMemberProofs] = useState({})
+  const [memberLookups, setMemberLookups] = useState({})
   const [syncingMembers, setSyncingMembers] = useState(false)
-  const [moderators, setModerators] = useState([])
+  const [moderators, setModerators] = useState(null)
+  const [discussions, setDiscussions] = useState(null)
+  const [tokens, setTokens] = useState(null)
 
   class Web3ProviderProxy {
     constructor(ethereumAddress, onSignatures, web3Provider, requestingApp) {
@@ -80,6 +83,10 @@ export const ThreeBoxProvider = ({
     }
   }
 
+  const getAddress = useCallback(identifier => {
+    return memberLookups[identifier]
+  }, [memberLookups])
+
   const getProfile = useCallback(async identifier => {
     const profile = await Box.getProfile(identifier)
     const { image } = profile
@@ -114,11 +121,9 @@ export const ThreeBoxProvider = ({
     [box, getProfile]
   )
 
-  // const userCanPost = useCallback(() => {
-  //   return members.includes(account.account)
-  // }, [account, members])
-
-  const userCanPost = true
+  const userCanPost = useCallback(() => {
+    return members.includes(account.account)
+  }, [account, members])
 
   const connect3Box = useCallback(async () => {
     const web3ProviderProxy = new Web3ProviderProxy(
@@ -127,6 +132,7 @@ export const ThreeBoxProvider = ({
       web3,
       dao
     )
+    if (!account.account) account.enable()
     try {
       setLoadingBox(true)
       setLoadingSpace(true)
@@ -193,6 +199,7 @@ export const ThreeBoxProvider = ({
             post.message = visiblePosts[post.postId]
             post.name = profile.name
             post.image = profile.image
+            post.address = memberLookups[profile.proof_did]
             post.isCurrentUser = await isCurrentUser(profile)
             post.creationDate = new Date(post.timestamp * 1000)
             post.proof_did = profile.proof_did
@@ -381,9 +388,12 @@ export const ThreeBoxProvider = ({
 
   // Reset 3Box if the account changes
   useEffect(() => {
-    setBox(null)
-    setSpace(null)
-    setActiveThread(null)
+    if(account.account !== activeAccount) {
+      setActiveAccount(account.account)
+      setBox(null)
+      setSpace(null)
+      setActiveThread(null)
+    }
   }, [account])
 
   useEffect(() => {
@@ -461,49 +471,69 @@ export const ThreeBoxProvider = ({
   }, [activeThreadAddress, activeThreadName, space, loadingSpace, resolveSpace])
 
   useEffect(() => {
-    if (holders) {
-      const memberAddresses = holders.map(holder => holder.address)
-      if (memberAddresses.sort().join(',') !== members.sort().join(',')) {
-        setMembers(memberAddresses)
+    if (apps.length > installedApps.length) setInstalledApps(apps)
+  }, [apps, installedApps, setInstalledApps])
+
+  useEffect(() => {
+    const discussionsApp = installedApps.find(
+      app => app.appId && app.appId === appIds.Discussions
+    )
+    if (discussionsApp) setDiscussions(discussionsApp)
+    const tokensApp = installedApps.find(
+      app => app.appId && app.appId === appIds.TokenManager
+    )
+    if (tokensApp) setTokens(tokensApp)
+  }, [installedApps])
+
+  useEffect(() => {
+    const getMembers = async () => {
+      const state = await wrapper.cache.get(getCacheKey(tokens.proxyAddress, 'state'))
+      const { holders } = state
+      if (holders) {
+        const memberAddresses = holders.map(holder => holder.address)
+        if (memberAddresses.sort().join(',') !== members.sort().join(',')) {
+          setMembers(memberAddresses)
+        }
       }
     }
-  }, [holders, members])
+    if (tokens) getMembers()
+  }, [tokens, members, wrapper])
 
   useEffect(() => {
     const lookupModerators = async () => {
-      const forumApp = await currentApp().toPromise()
-      if (forumApp) {
-        const forumAddress = forumApp.appAddress
-        const moderatorRole = forumAddress
+      if (discussions) {
+        const discussionsAddress = discussions.proxyAddress
+        const moderatorRole = discussionsAddress
           ? permissions.find(
               permission =>
                 permission.app &&
-                permission.app.proxyAddress === forumAddress &&
+                permission.app.proxyAddress === discussionsAddress &&
                 permission.role.id === 'MODERATOR_ROLE'
             )
           : null
-        setModerators(
-          moderatorRole
-            ? moderatorRole.entities.map(entity => entity.address)
-            : []
-        )
+        if (moderatorRole) {
+          setModerators(moderatorRole.entities.map(entity => entity.address))
+        }
       }
     }
-    if (!moderators.length) lookupModerators()
-  }, [currentApp, permissions, moderators, setModerators])
+    if (!moderators) lookupModerators()
+  }, [discussions, permissions, moderators, setModerators])
 
   useEffect(() => {
     const getProofs = async () => {
       const proofs = { ...memberProofs }
+      const lookups = { ...memberLookups }
       await Promise.all(
         members.map(async member => {
           if (!memberProofs[member]) {
             const profile = await getProfile(member)
             proofs[member] = profile.proof_did
+            lookups[profile.proof_did] = member
           }
         })
       )
-      setMemberProofs(proofs)
+      setMemberProofs({ ...proofs })
+      setMemberLookups({ ...lookups })
       setSyncingMembers(false)
     }
     if (
@@ -517,7 +547,7 @@ export const ThreeBoxProvider = ({
       setSyncingMembers(true)
       getProofs()
     }
-  }, [members, memberProofs, getProfile, syncingMembers])
+  }, [members, memberProofs, memberLookups, getProfile, syncingMembers])
 
   return (
     <ThreeBoxContext.Provider
@@ -529,6 +559,7 @@ export const ThreeBoxProvider = ({
         connect3Box,
         deactivateThread,
         deletePost,
+        getAddress,
         getPosts,
         getProfile,
         isCurrentUser,
