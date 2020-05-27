@@ -14,11 +14,17 @@ const networkType = getEthNetworkType()
 
 export const appIds = {
   Agent: '0x9ac98dc5f995bf0211ed589ef022719d1487e5cb2bab505676f0d084c07cf89a',
+  Discussions:
+    networkType === 'local'
+      ? '0xf8c9b8210902c14e71192ea564edd090c1659cbef1384e362fb508d396d72a38' // discussions.aragonpm.eth
+      : '0x36ed2b69c7261556794cbbfdfff77470091d1f97a13064941ccb6a2c578ecc3d', // discussions.open.aragonpm.eth
   Finance: '0xbf8491150dafc5dcaee5b861414dca922de09ccffa344964ae167212e8c673ae',
   TokenManager:
     '0x6b20a3010614eeebf2138ccec99f028a61c811b3b1a3343b6ff635985c75c91f',
-  // Storage: '0xa53eae0295e6028e828951e8a5a05c14acb4d7bc636d130658894dd48b93ec9a', //storage.aragonpm.eth
-  Storage: '0x32036ef13b405ba776f3af6022c32a97a3ab30bfe6c5c0dae3bddc70e645fbf3', // storage-experimental.open.aragonpm.eth
+  Storage:
+    networkType === 'local'
+      ? '0xa53eae0295e6028e828951e8a5a05c14acb4d7bc636d130658894dd48b93ec9a' // storage.aragonpm.eth
+      : '0x32036ef13b405ba776f3af6022c32a97a3ab30bfe6c5c0dae3bddc70e645fbf3', // storage-experimental.open.aragonpm.eth
   Survey: '0x030b2ab880b88e228f2da5a3d19a2a31bc10dbf91fb1143776a6de489389471e',
   Vault: '0x7e852e0fcfce6551c13800f1e7476f982525c2b5277ba14b24339c68416336d1',
   Voting: '0x9fa3927f639745e587912d4b0fea7ef9013bf93fb907d29faeab57417ba6e1d4',

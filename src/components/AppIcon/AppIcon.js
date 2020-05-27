@@ -6,6 +6,7 @@ import { appIconUrl, legacyAppIconUrl } from '../../utils'
 import iconSvgAcl from './assets/app-acl.svg'
 import iconSvgApps from './assets/app-apps.svg'
 import iconSvgDefault from './assets/app-default.svg'
+import iconSvgForum from './assets/app-forum.svg'
 import iconSvgHome from './assets/app-home.svg'
 import iconSvgKernel from './assets/app-kernel.svg'
 import iconSvgPermissions from './assets/app-permissions.svg'
@@ -22,6 +23,7 @@ const DISPLAY_FALLBACK_DELAY = 50
 const KNOWN_ICONS = new Map([
   ['apps', iconSvgApps],
   ['console', iconSvgConsole],
+  ['forum', iconSvgForum],
   ['home', iconSvgHome],
   ['organization', iconSvgSettings],
   ['permissions', iconSvgPermissions],

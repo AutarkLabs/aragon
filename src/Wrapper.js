@@ -3,7 +3,14 @@ import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import memoize from 'lodash.memoize'
 import { Profile } from '@openworklabs/aragon-profile'
-import { AppCenter, Console, Home, Organization, Permissions } from './apps'
+import {
+  AppCenter,
+  Console,
+  Forum,
+  Home,
+  Organization,
+  Permissions,
+} from './apps'
 import App404 from './components/App404/App404'
 import AppIFrame from './components/App/AppIFrame'
 import AppInternal from './components/App/AppInternal'
@@ -160,9 +167,7 @@ class Wrapper extends React.PureComponent {
       ? historyPush(
           `${getAppPath({ dao: locator.dao, instanceId })}/${account}`
         )
-      : historyPush(
-          getAppPath({ dao: locator.dao, instanceId, instancePath })
-        )
+      : historyPush(getAppPath({ dao: locator.dao, instanceId, instancePath }))
   }
 
   handleAppIFrameRef = appIFrame => {
@@ -343,11 +348,26 @@ class Wrapper extends React.PureComponent {
       onSignatures,
       permissionsLoading,
       repos,
+      web3,
       wrapper,
     } = this.props
 
     const appsLoading = appsStatus === APPS_STATUS_LOADING
     const reposLoading = appsLoading || Boolean(apps.length && !repos.length)
+
+    if (instanceId === 'forum') {
+      return (
+        <AppInternal>
+          <Forum
+            apps={apps}
+            locator={locator}
+            onPathRequest={this.handlePathRequest}
+            web3={web3}
+            wrapper={wrapper}
+          />
+        </AppInternal>
+      )
+    }
 
     if (instanceId === 'home') {
       return (
@@ -426,7 +446,7 @@ class Wrapper extends React.PureComponent {
             enableWallet={onRequestEnable}
             onSignatures={onSignatures}
             parts={parts}
-            web3Provider={window.web3}
+            web3Provider={web3}
           />
         </AppInternal>
       )

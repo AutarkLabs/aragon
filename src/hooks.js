@@ -16,6 +16,7 @@ import { log, removeStartingSlash } from './utils'
 import { addressesEqual } from './web3-utils'
 import { IPFSStorageContext } from './contexts/IpfsStorageContext'
 import { OrgInfoContext } from './contexts/OrgInfoContext'
+import { ThreeBoxContext } from './contexts/ThreeBoxContext'
 
 // Update `now` at a given interval.
 export function useNow(updateEvery = 1000) {
@@ -365,4 +366,8 @@ export const useOrganizationDataStore = () => {
 
 export const useOrgInfo = () => {
   return useContext(OrgInfoContext)
+}
+
+export const use3Box = () => {
+  return useContext(ThreeBoxContext)
 }

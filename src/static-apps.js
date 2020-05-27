@@ -17,6 +17,7 @@ export const staticApps = new Map(
   Object.entries({
     apps: staticApp('apps', 'App Center'),
     console: staticApp('console', 'Console'),
+    forum: staticApp('forum', 'Forum'),
     home: staticApp('home', 'Home', ''),
     organization: staticApp('organization', 'Organization'),
     permissions: staticApp('permissions', 'Permissions'),

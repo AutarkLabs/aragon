@@ -10,6 +10,7 @@ import {
   unselectable,
   useTheme,
 } from '@aragon/ui'
+import { appIds } from '../../environment'
 import { lerp } from '../../math-utils'
 import {
   AppInstanceGroupType,
@@ -32,6 +33,7 @@ const { div: AnimDiv } = animated
 
 const APP_APPS_CENTER = staticApps.get('apps').app
 const APP_CONSOLE = staticApps.get('console').app
+const APP_FORUM = staticApps.get('forum').app
 const APP_HOME = staticApps.get('home').app
 const APP_ORGANIZATION = staticApps.get('organization').app
 const APP_PERMISSIONS = staticApps.get('permissions').app
@@ -74,15 +76,19 @@ function MenuPanel({
     () =>
       appInstanceGroups
         .filter(appGroup => appGroup.hasWebApp)
+        .filter(appGroup => appGroup.app.appId !== appIds.Discussions)
         .map(appGroup => ({
           ...appGroup,
           icon: <AppIcon app={appGroup.app} />,
         })),
     [appInstanceGroups]
   )
-
   const showConsole = consoleVisible || activeInstanceId === 'console'
-  const menuApps = [APP_HOME, appGroups]
+  const showForum =
+    appInstanceGroups.findIndex(
+      appGroup => appGroup.app.appId === appIds.Discussions
+    ) !== -1
+  const menuApps = [APP_HOME, ...(showForum ? [APP_FORUM] : []), appGroups]
   const systemApps = [
     APP_PERMISSIONS,
     APP_APPS_CENTER,

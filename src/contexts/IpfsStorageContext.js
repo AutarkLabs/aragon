@@ -32,7 +32,7 @@ const initialStorageContextValue = {
 const reducer = (state, action) => {
   switch (action.type) {
     case INITIALIZE:
-     return initialStorageContextValue
+      return initialStorageContextValue
     case NO_STORAGE_APP_INSTALLED:
       return {
         ...initialStorageContextValue,
@@ -255,5 +255,6 @@ export const IPFSStorageProvider = ({ children, apps, dao, wrapper }) => {
 IPFSStorageProvider.propTypes = {
   apps: PropTypes.arrayOf(AppType),
   children: PropTypes.node.isRequired,
+  dao: PropTypes.object.isRequired,
   wrapper: AragonType,
 }
