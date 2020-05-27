@@ -1,6 +1,5 @@
-import React, { useCallback, useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import { AppStateContext } from '../context/AppStateContext'
-import forum from '../abi/Forum.json'
 
 export default function useAragonApi() {
   const context = useContext(AppStateContext)

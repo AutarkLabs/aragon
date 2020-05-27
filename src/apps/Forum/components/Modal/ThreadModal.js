@@ -57,11 +57,13 @@ const ThreadModal = ({ visible, closeModal }) => {
     setDescription('')
   }
 
+  const noop = () => {}
+
   return (
     <Modal
       visible={visible}
       closeButton={!loadingSpace}
-      onClose={!loadingSpace ? clearAndClose : null}
+      onClose={!loadingSpace ? () => clearAndClose() : () => noop()}
       padding={0}
     >
       <div

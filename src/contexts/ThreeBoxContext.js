@@ -22,7 +22,6 @@ export const ThreeBoxProvider = ({
 }) => {
   const permissions = usePermissionsByRole()
   const account = useWallet()
-  const [initialized, setInitialized] = useState(false)
   const [installedApps, setInstalledApps] = useState(apps)
   const [loadingBox, setLoadingBox] = useState(false)
   const [loadingSpace, setLoadingSpace] = useState(false)
@@ -83,15 +82,18 @@ export const ThreeBoxProvider = ({
     }
   }
 
-  const getAddress = useCallback(identifier => {
-    return memberLookups[identifier]
-  }, [memberLookups])
+  const getAddress = useCallback(
+    identifier => {
+      return memberLookups[identifier]
+    },
+    [memberLookups]
+  )
 
   const getProfile = useCallback(async identifier => {
     const profile = await Box.getProfile(identifier)
-    const { image } = profile
-    if (image) {
-      const imageIPFS = image[0]['contentUrl']['/']
+    if (profile.proof_did) profile.proofDid = profile.proof_did // Linter requires camel case
+    if (profile.image) {
+      const imageIPFS = profile.image[0]['contentUrl']['/']
       const imageLink = `${ipfsDefaultConf.gateway}/${imageIPFS}`
       profile.image = imageLink
     }
@@ -116,7 +118,7 @@ export const ThreeBoxProvider = ({
       if (!box) return false
       const profile = await getProfile(did)
       const currentProfile = await getProfile(box.DID)
-      return profile.proof_did === currentProfile.proof_did
+      return profile.proofDid === currentProfile.proofDid
     },
     [box, getProfile]
   )
@@ -149,16 +151,7 @@ export const ThreeBoxProvider = ({
       setLoadingSpace(false)
       return null
     }
-  }, [
-    Web3ProviderProxy,
-    account.account,
-    dao,
-    onSignatures,
-    web3,
-    setLoadingBox,
-    setLoadingSpace,
-    setSpace,
-  ])
+  }, [Web3ProviderProxy, account, onSignatures, web3, dao])
 
   const resolveSpace = useCallback(async () => {
     let thisSpace
@@ -199,18 +192,18 @@ export const ThreeBoxProvider = ({
             post.message = visiblePosts[post.postId]
             post.name = profile.name
             post.image = profile.image
-            post.address = memberLookups[profile.proof_did]
+            post.account = memberLookups[profile.proofDid]
             post.isCurrentUser = await isCurrentUser(profile)
             post.creationDate = new Date(post.timestamp * 1000)
-            post.proof_did = profile.proof_did
+            post.proofDid = profile.proofDid
             return post
           })
         )
       ).filter(post => {
-        return Object.values(memberProofs).includes(post.proof_did)
+        return Object.values(memberProofs).includes(post.proofDid)
       })
     },
-    [getProfile, isCurrentUser, memberProofs]
+    [getProfile, isCurrentUser, memberLookups, memberProofs]
   )
 
   const updatePosts = useCallback(
@@ -388,13 +381,13 @@ export const ThreeBoxProvider = ({
 
   // Reset 3Box if the account changes
   useEffect(() => {
-    if(account.account !== activeAccount) {
+    if (account.account !== activeAccount) {
       setActiveAccount(account.account)
       setBox(null)
       setSpace(null)
       setActiveThread(null)
     }
-  }, [account])
+  }, [account, activeAccount])
 
   useEffect(() => {
     const setThread = async () => {
@@ -487,7 +480,9 @@ export const ThreeBoxProvider = ({
 
   useEffect(() => {
     const getMembers = async () => {
-      const state = await wrapper.cache.get(getCacheKey(tokens.proxyAddress, 'state'))
+      const state = await wrapper.cache.get(
+        getCacheKey(tokens.proxyAddress, 'state')
+      )
       const { holders } = state
       if (holders) {
         const memberAddresses = holders.map(holder => holder.address)
@@ -527,8 +522,8 @@ export const ThreeBoxProvider = ({
         members.map(async member => {
           if (!memberProofs[member]) {
             const profile = await getProfile(member)
-            proofs[member] = profile.proof_did
-            lookups[profile.proof_did] = member
+            proofs[member] = profile.proofDid
+            lookups[profile.proofDid] = member
           }
         })
       )
@@ -577,6 +572,7 @@ export const ThreeBoxProvider = ({
 }
 
 ThreeBoxProvider.propTypes = {
+  apps: PropTypes.array.isRequired,
   children: PropTypes.node.isRequired,
   dao: PropTypes.string.isRequired,
   onSignatures: PropTypes.func.isRequired,

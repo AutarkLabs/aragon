@@ -84,12 +84,11 @@ function MenuPanel({
     [appInstanceGroups]
   )
   const showConsole = consoleVisible || activeInstanceId === 'console'
-  const showForum = appInstanceGroups.findIndex(appGroup => appGroup.app.appId === appIds.Discussions) !== -1
-  const menuApps = [
-    APP_HOME,
-    ...(showForum ? [APP_FORUM] : []),
-    appGroups
-  ]
+  const showForum =
+    appInstanceGroups.findIndex(
+      appGroup => appGroup.app.appId === appIds.Discussions
+    ) !== -1
+  const menuApps = [APP_HOME, ...(showForum ? [APP_FORUM] : []), appGroups]
   const systemApps = [
     APP_PERMISSIONS,
     APP_APPS_CENTER,

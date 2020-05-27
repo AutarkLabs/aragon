@@ -8,7 +8,7 @@ import {
   GU,
   Header,
   IconPlus,
-  SyncIndicator
+  SyncIndicator,
 } from '@aragon/ui'
 import { Empty } from './components/Card'
 import { Threads, ThreadDetail } from './components/Content'
@@ -114,8 +114,8 @@ const Forum = () => {
   )
 }
 
-const App = (props) => (
-  <AppStateProvider {...props} >
+const App = props => (
+  <AppStateProvider {...props}>
     <Forum />
   </AppStateProvider>
 )

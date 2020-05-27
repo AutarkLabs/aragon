@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
+import { EthereumAddressType } from '../../../../prop-types'
 import {
   ButtonBase,
   Button,
@@ -8,7 +9,7 @@ import {
   IconEdit,
   IconTrash,
   textStyle,
-  useTheme
+  useTheme,
 } from '@aragon/ui'
 import { formatDistance } from 'date-fns'
 import Markdown from '../Markdown/Markdown'
@@ -17,7 +18,7 @@ import { use3Box } from '../../../../hooks'
 import { DeleteModal } from '../Modal'
 import LocalIdentityBadge from '../../../../components/IdentityBadge/LocalIdentityBadge'
 
-const Post = ({ author, address, creationDate, message, postId }) => {
+const Post = ({ author, account, creationDate, message, postId }) => {
   const theme = useTheme()
   const [editing, setEditing] = useState(false)
   const [newMessage, setNewMessage] = useState(message)
@@ -84,7 +85,7 @@ const Post = ({ author, address, creationDate, message, postId }) => {
               margin-bottom: ${GU}px;
             `}
           >
-            <LocalIdentityBadge entity={address} />
+            <LocalIdentityBadge entity={account} />
             {!editing && (
               <div
                 css={`
@@ -155,12 +156,12 @@ const Post = ({ author, address, creationDate, message, postId }) => {
                     `}
                   >
                     <ButtonBase onClick={startEdit}>
-                      <IconEdit size='medium' />
+                      <IconEdit size="medium" />
                     </ButtonBase>
                   </div>
                   <div>
                     <ButtonBase onClick={startDelete}>
-                      <IconTrash size='medium' />
+                      <IconTrash size="medium" />
                     </ButtonBase>
                   </div>
                 </>
@@ -179,9 +180,8 @@ const Post = ({ author, address, creationDate, message, postId }) => {
 }
 
 Post.propTypes = {
+  account: EthereumAddressType,
   author: PropTypes.string.isRequired,
-  image: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
   creationDate: PropTypes.instanceOf(Date).isRequired,
   message: PropTypes.string.isRequired,
   postId: PropTypes.string.isRequired,

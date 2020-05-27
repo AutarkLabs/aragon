@@ -368,7 +368,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { theme, walletAccount } = this.props
+    const { theme } = this.props
     const {
       apps,
       appIdentifiers,

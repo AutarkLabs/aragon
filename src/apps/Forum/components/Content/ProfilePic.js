@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import styled, { keyframes } from 'styled-components'
-import { EthIdenticon, IconUser, GU, useTheme } from '@aragon/ui'
+import { EthIdenticon, GU, useTheme } from '@aragon/ui'
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
 
@@ -35,7 +35,11 @@ const ProfilePic = ({ size, imgSrc, account, loading }) => {
     )
   }
   return (
-    <EthIdenticon address={account || EMPTY_ADDRESS} scale={size / (3 * GU)} radius={size / 2} />
+    <EthIdenticon
+      address={account || EMPTY_ADDRESS}
+      scale={size / (3 * GU)}
+      radius={size / 2}
+    />
   )
 }
 

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import { useContext } from 'react'
 import { AppStateContext } from '../context/AppStateContext'
 
 export default function useAppState() {

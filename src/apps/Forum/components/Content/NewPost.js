@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import { Button, Card, GU, textStyle, useTheme } from '@aragon/ui'
+import React, { useState } from 'react'
+import { Button, Card, GU } from '@aragon/ui'
 import Markdown from '../Markdown/Markdown'
 import { useWallet } from '../../../../wallet'
 import { use3Box } from '../../../../hooks'
 import LocalIdentityBadge from '../../../../components/IdentityBadge/LocalIdentityBadge'
 
 const NewPost = () => {
-  const theme = useTheme()
   const [description, setDescription] = useState('')
-  const [userProfile, setUserProfile] = useState()
   const { account } = useWallet()
   const { newPost } = use3Box()
 
@@ -17,21 +15,21 @@ const NewPost = () => {
     setDescription('')
   }
 
-  return (
-    <Card
-      width="100%"
-      height="auto"
-      css={`
-        margin-bottom: ${2 * GU}px;
-        padding: ${3 * GU}px;
-      `}
-    >
-      <div
+  if (account) {
+    return (
+      <Card
+        width="100%"
+        height="auto"
         css={`
-          width: 100%;
+          margin-bottom: ${2 * GU}px;
+          padding: ${3 * GU}px;
         `}
       >
-        {userProfile && (
+        <div
+          css={`
+            width: 100%;
+          `}
+        >
           <div
             css={`
               margin-bottom: ${GU}px;
@@ -39,28 +37,28 @@ const NewPost = () => {
           >
             <LocalIdentityBadge entity={account} />
           </div>
-        )}
-        <div>
-          <Markdown data={description} setData={setDescription} />
-        </div>
-        <div
-          css={`
-            display: flex;
-            justify-content: flex-end;
-          `}
-        >
           <div>
-            <Button
-              label="Submit"
-              mode="strong"
-              disabled={description.length === 0}
-              onClick={submitNewPost}
-            />
+            <Markdown data={description} setData={setDescription} />
+          </div>
+          <div
+            css={`
+              display: flex;
+              justify-content: flex-end;
+            `}
+          >
+            <div>
+              <Button
+                label="Submit"
+                mode="strong"
+                disabled={description.length === 0}
+                onClick={submitNewPost}
+              />
+            </div>
           </div>
         </div>
-      </div>
-    </Card>
-  )
+      </Card>
+    )
+  }
 }
 
 export default NewPost

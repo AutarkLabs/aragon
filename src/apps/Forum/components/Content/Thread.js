@@ -39,10 +39,10 @@ const ThreadInfo = ({ address, threadDate, threadAuthor }) => {
     if (postAuthor && !initPic) {
       setInitPic(true)
       getProfile(postAuthor)
-        .then((profile) => {
-          const { image, proof_did } = profile
+        .then(profile => {
+          const { image, proofDid } = profile
           if (!image) {
-            const authorAddress = getAddress(proof_did)
+            const authorAddress = getAddress(proofDid)
             setPostAuthorAddress(authorAddress)
           } else {
             setPostAuthorPic(image)
@@ -52,7 +52,7 @@ const ThreadInfo = ({ address, threadDate, threadAuthor }) => {
         })
         .catch(error => console.error(error))
     }
-  }, [postAuthor, initPic, getProfile])
+  }, [postAuthor, initPic, getProfile, getAddress])
 
   useEffect(() => {
     if (!initPost) {
