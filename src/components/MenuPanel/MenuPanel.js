@@ -10,6 +10,7 @@ import {
   unselectable,
   useTheme,
 } from '@aragon/ui'
+import { appIds } from '../../environment'
 import { lerp } from '../../math-utils'
 import {
   AppInstanceGroupType,
@@ -74,6 +75,7 @@ function MenuPanel({
     () =>
       appInstanceGroups
         .filter(appGroup => appGroup.hasWebApp)
+        .filter(appGroup => appGroup.app.appId !== appIds.Discussions)
         .map(appGroup => ({
           ...appGroup,
           icon: <AppIcon app={appGroup.app} />,
