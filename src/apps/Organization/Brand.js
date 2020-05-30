@@ -33,6 +33,7 @@ const Brand = () => {
 
   const colorRX = /^#(([a-f0-9]{3}){1,2})$/i
   const colorError = accentStart && !colorRX.test(accentStart)
+  const colorError2 = accentEnd && !colorRX.test(accentEnd)
   const {
     ipfsEndpoints,
     setDagInOrgDataStore,
@@ -137,8 +138,8 @@ const Brand = () => {
                         padding: 30px;
                         selectedbuttonstyle,setbuttonstylemargin-bottom: 10px;
                         border: ${isDragActive
-                          ? '1px dashed green'
-                          : '1px solid white'};
+                          ? `1px dashed ${theme.green}`
+                          : `1px solid ${theme.border}`};
                       `}
                     >
                       <img
@@ -198,7 +199,7 @@ const Brand = () => {
             <div>
               <TextInput
                 css={`
-                  border: 1px solid ${colorError ? 'red' : '#DDE4E9'};
+                  border: 1px solid ${colorError ? theme.error : theme.border};
                   width: 120px;
                   margin-right: ${2 * GU}px;
                   margin-bottom: ${2 * GU}px;
@@ -210,7 +211,8 @@ const Brand = () => {
               {accentStyle === 1 && (
                 <TextInput
                   css={`
-                    border: 1px solid ${colorError ? 'red' : '#DDE4E9'};
+                    border: 1px solid
+                      ${colorError2 ? theme.error : theme.border};
                     width: 120px;
                     margin-right: ${2 * GU}px;
                     margin-bottom: ${2 * GU}px;

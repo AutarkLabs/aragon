@@ -31,7 +31,7 @@ function OrgIcon({ orgAddress, size }) {
           width={size}
           height={size}
           alt=""
-          css="object-fit: contain"
+          css="border-radius: 50%; object-fit: contain"
         />
       ) : (
         <EthIdenticon

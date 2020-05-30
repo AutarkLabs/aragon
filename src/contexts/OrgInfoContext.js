@@ -30,10 +30,13 @@ export const OrgInfoProvider = ({
     return orgInfo[dao]
   }, [dao, orgInfo])
 
-  const getOrg = useCallback((dao) => {
-    if (!dao || !orgInfo) return null
-    return orgInfo[dao]
-  }, [dao, orgInfo])
+  const getOrg = useCallback(
+    dao => {
+      if (!dao || !orgInfo) return null
+      return orgInfo[dao]
+    },
+    [orgInfo]
+  )
 
   const fetchOrgInfo = useCallback(async () => {
     const [
@@ -60,12 +63,14 @@ export const OrgInfoProvider = ({
         data.image = URL.createObjectURL(
           new Blob([arrayBuffer], { type: data.imageType })
         )
-        clientData.image = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+        clientData.image = btoa(
+          String.fromCharCode(...new Uint8Array(arrayBuffer))
+        )
       }
     }
 
-    const newOrgInfo = {...orgInfo}
-    const newClientOrgInfo = {...CLIENT_ORG_INFO}
+    const newOrgInfo = { ...orgInfo }
+    const newClientOrgInfo = { ...CLIENT_ORG_INFO }
     newOrgInfo[dao] = data
     newClientOrgInfo[dao] = clientData
     setOrgInfo(newOrgInfo)
@@ -77,19 +82,27 @@ export const OrgInfoProvider = ({
       _name: appearance,
       _appearance: appearance,
     })
-  }, [appearance, dao, getDagFromOrgDataStore, ipfsEndpoints, updateClientTheme])
+  }, [
+    appearance,
+    dao,
+    getDagFromOrgDataStore,
+    ipfsEndpoints,
+    orgInfo,
+    setFetchedData,
+    updateClientTheme,
+  ])
 
   useEffect(() => {
-    //setOrgInfo(null)
+    // setOrgInfo(null)
     if (!fetchedData && ipfsProviderConnectionSuccess && wrapper) {
       fetchOrgInfo()
     }
-  }, [dao, ipfsProviderConnectionSuccess, wrapper])
+  }, [dao, fetchOrgInfo, fetchedData, ipfsProviderConnectionSuccess, wrapper])
 
   useEffect(() => {
-    if(dao && orgInfo) {
+    if (dao && orgInfo) {
       const data = orgInfo[dao]
-      if(data) {
+      if (data) {
         updateClientTheme(appearance, {
           ...data.theme,
           _name: appearance,
@@ -97,7 +110,7 @@ export const OrgInfoProvider = ({
         })
       }
     }
-  }, [dao, orgInfo])
+  }, [appearance, dao, orgInfo, updateClientTheme])
 
   return (
     <OrgInfoContext.Provider value={{ getOrg, getThisOrg }}>
@@ -108,4 +121,8 @@ export const OrgInfoProvider = ({
 
 OrgInfoProvider.propTypes = {
   children: PropTypes.node.isRequired,
+  dao: PropTypes.string.isRequired,
+  fetchedData: PropTypes.object.isRequired,
+  setFetchedData: PropTypes.func.isRequired,
+  wrapper: PropTypes.object.isRequired,
 }
