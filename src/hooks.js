@@ -11,11 +11,16 @@ import {
   IdentityContext,
   identityEventTypes,
 } from './components/IdentityManager/IdentityManager'
+import { ipfsDefaultConf } from './environment'
 import keycodes from './keycodes'
 import { log, removeStartingSlash } from './utils'
 import { addressesEqual } from './web3-utils'
 import { IPFSStorageContext } from './contexts/IpfsStorageContext'
 import { OrgInfoContext } from './contexts/OrgInfoContext'
+
+const HTTP_REGEX =
+  'https?://(www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)'
+const IPFS_REGEX = 'Qm[1-9A-HJ-NP-Za-km-z]{44}'
 
 // Update `now` at a given interval.
 export function useNow(updateEvery = 1000) {
@@ -274,12 +279,22 @@ export function useLocalIdentity(entity) {
   const { resolve, identityEvents$ } = useContext(IdentityContext)
   const [name, setName] = useState(null)
   const [source, setSource] = useState(null)
+  const [image, setImage] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   const handleResolve = useCallback(async () => {
     try {
-      const { name = null, source = null } = (await resolve(entity)) || {}
+      const { name = null, source = null, image = null } =
+          (await resolve(entity)) || {}
+      setLoading(false)
       setName(name)
       setSource(source)
+      if (image.match(HTTP_REGEX)) {
+        setImage(image)
+      }
+      if (image.match(IPFS_REGEX)) {
+        setImage(`${ipfsDefaultConf.gateway}/${image}`)
+      }
     } catch (e) {
       // address does not resolve to identity
     }
@@ -314,7 +329,7 @@ export function useLocalIdentity(entity) {
     }
   }, [identityEvents$, handleResolve, entity, handleRemove])
 
-  return { name, source, handleResolve }
+  return { name, source, image, loading, handleResolve }
 }
 
 export function useMatchMedia(query) {

@@ -80,15 +80,14 @@ function ConnectedMode() {
   const theme = useTheme()
   const { account } = useWallet()
   const [opened, setOpened] = useState(false)
-  const { name: label } = useLocalIdentity(account)
-
+  const { name: label, image } = useLocalIdentity(account)
   const close = () => setOpened(false)
   const toggle = () => setOpened(opened => !opened)
 
   const containerRef = useRef()
 
   const { walletNetworkName, hasNetworkMismatch } = useNetworkConnectionData()
-  
+
   return (
     <div
       ref={containerRef}
@@ -125,7 +124,21 @@ function ConnectedMode() {
           `}
         >
           <div css="position: relative">
-            <EthIdenticon address={account} radius={RADIUS} />
+            {image ? (
+              <div
+                css={`
+                  width: ${3 * GU}px;
+                  height: ${3 * GU}px;
+                  border-radius: ${RADIUS}px;
+                  background-size: cover;
+                  background-position: 50% 50%;
+                  background-repeat: no-repeat;
+                  background-image: url(${image});
+                `}
+              />
+            ) : (
+              <EthIdenticon address={account} radius={RADIUS} />
+            )}
             <div
               css={`
                 position: absolute;

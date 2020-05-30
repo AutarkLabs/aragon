@@ -7,10 +7,13 @@ const RootProvider = Root.Provider
 
 function AppInternal({ children }) {
   const appWidth = useAppWidth()
+  console.log('internal app width: ', appWidth)
   return (
     <RootProvider css="height: 100%">
       <ScrollView>
-        <Layout parentWidth={appWidth}>{children}</Layout>
+        <Layout css="height: 100%" parentWidth={appWidth}>
+          {children}
+        </Layout>
       </ScrollView>
     </RootProvider>
   )

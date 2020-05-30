@@ -2,11 +2,11 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import memoize from 'lodash.memoize'
-import { Profile } from '@openworklabs/aragon-profile'
 import { AppCenter, Console, Home, Organization, Permissions } from './apps'
 import App404 from './components/App404/App404'
 import AppIFrame from './components/App/AppIFrame'
 import AppInternal from './components/App/AppInternal'
+import ProfileInternal from './components/App/ProfileInternal'
 import AppLoader from './components/App/AppLoader'
 import OrgView from './components/OrgView/OrgView'
 import SignerPanel from './components/SignerPanel/SignerPanel'
@@ -417,18 +417,14 @@ class Wrapper extends React.PureComponent {
     }
 
     if (instanceId === 'profile') {
-      const parts = locator.instancePath.split('/')
-      parts.shift()
       return (
-        <AppInternal>
-          <Profile
-            account={account}
-            enableWallet={onRequestEnable}
-            onSignatures={onSignatures}
-            parts={parts}
-            web3Provider={window.web3}
-          />
-        </AppInternal>
+        <ProfileInternal
+          account={account}
+          enableWallet={onRequestEnable}
+          locator={locator}
+          onSignatures={onSignatures}
+          web3Provider={window.web3}
+        />
       )
     }
 
@@ -465,6 +461,10 @@ export default props => {
   const { account } = useWallet()
   const { identityEvents$ } = useIdentity()
   return (
-    <Wrapper {...props} account={account} identityEvents$={identityEvents$} />
+    <Wrapper
+      {...props}
+      account={account}
+      identityEvents$={identityEvents$}
+    />
   )
 }
